@@ -153,8 +153,9 @@ class Client(Ui_MainWidget):
 
     def __show_welcomescreen(self):
         """Username이 유효하지 않을 때 실행되는 함수."""
-        # from Client.welcome import WelcomeScreen
-        self.chatroom.destroy()
+        # from Client.welcome import
+        print('유저이름이 유효하지 않음')
+        # self.chatroom.destroy()
         # dialog = QtWidgets.QDialog()
         # self.__welcomescreen = WelcomeScreen(dialog)
         # self.__welcomescreen = LoginScreen.Ui_Welcomescreen()
