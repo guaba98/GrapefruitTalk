@@ -27,7 +27,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 이벤트 연결
         self.connect_event()
 
-        self.__chatroom = Client(self, 'soyeon')
+        self.__chatroom = Client(self, '다른 소연')
 
 
     # 화면 글꼴 설정
