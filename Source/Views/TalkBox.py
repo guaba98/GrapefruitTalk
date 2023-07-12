@@ -71,7 +71,7 @@ class TalkBox(QObject):
 
     def update_message(self, message, time):
         self.message = message
-        self.time = datetime.strptime(time, '%H:%M')
+        self.time = datetime.strptime(time, '%H-%M')
         self.message_signal.emit(self.name, self.color, self.message, self.time)
 
     @property
