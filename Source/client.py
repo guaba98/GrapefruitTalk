@@ -118,7 +118,7 @@ class Client(Ui_MainWidget):
                 message = self.socket_for_client.recv(self.buffer_num)
                 decoded_message = message.decode('ISO-8859-1')
                 print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
-                print('들어온 메세지는 utf-8', message.decode(self.format_type))
+                print('들어온 메세지는', message)
 
 
                 if message:
