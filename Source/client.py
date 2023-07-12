@@ -2,6 +2,8 @@ import socket
 import datetime
 import threading
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QLayout
 import sys
 import pickle
 from Views.UI_MainWidget import Ui_MainWidget
@@ -107,7 +109,7 @@ class Client(Ui_MainWidget):
         talkbox = DateLine(datetime.datetime.now())
         self.talk_page.layout_talk.addLayout(talkbox.layout)
 
-    def receive_message(self):
+    def receive_message(self, client_message):
         """
         각각 다른 스레드에서 있는 서버에서 메세지를 받기 위한 역할을 한다.
         메세지는 서버에서 받아지고 첫번째로 피클 모듈을 사용하여 리스트 형식으로 변형된다.
@@ -117,9 +119,6 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
-                # decoded_message = message.decode('ISO-8859-1')
-                # print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
-                # print('들어온 메세지는 해독안한', message)
                 if message:
                     try:
                         connected_users = pickle.loads(message)
@@ -130,15 +129,24 @@ class Client(Ui_MainWidget):
                         #     self.connected_clients.addItem(name)
                     except:
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode('ISO-8859-1'))
-
                         self.add_date_line()
-                        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
-                        self.layout_talk.addLayout(talkbox.layout)
+                        talkbox = TalkBox("", "test_user", message.decode(self.format_type), datetime.datetime.now())
+                        talkbox.message_signal.connect(self.add_talkbox)
+                        # QtCore.QMetaObject.invokeMethod(self.talk_page.layout_talk, 'addLayout',
+                        #                                 QtCore.Qt.QueuedConnection,
+                        #                                 QtCore.Q_ARG(QLayout, talkbox.layout))
+
+                        # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
         except(ConnectionAbortedError, ConnectionResetError):
             pass
+    def add_talkbox(self, img_path, name, msg, time):
+        talkbox = TalkBox(img_path, name, msg, time)
+        talkbox_layout = talkbox.layout()
+        self.talk_page.layout_talk.addLayout(talkbox_layout)
+
+
+
 
     def disconnect_func(self):
         """클라이언트가 연결을 종료할 때 실행되는 함수. 만약 x버튼이 있다면"""

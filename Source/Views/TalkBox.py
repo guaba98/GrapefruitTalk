@@ -2,11 +2,13 @@ from datetime import datetime
 
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPlainTextEdit
 from PyQt5.QtGui import QPixmap, QPainterPath, QPainter
-from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint
+from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint, pyqtSignal, QObject
 
 from Source.Views.Font import Font
 
 class TalkBox:
+    message_signal = pyqtSignal(str, str, str, str)
+
     def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime):
         """
         :param t_img: 프로필 타입 → 추 후 수정예정
@@ -14,6 +16,12 @@ class TalkBox:
         :param t_talk: 텍스트
         :param t_time: 발송 시간
         """
+        self.image = t_img
+        self.nickname = t_nick
+        self.message = t_talk
+        self.time = t_time
+
+
         self._grid_layout = QGridLayout()
         self._grid_layout.setAlignment(Qt.AlignLeft)
         self._grid_layout.setColumnStretch(0, 0)
@@ -52,6 +60,10 @@ class TalkBox:
         self._lbl_time.setFont(Font.text(3))
         self._lbl_time.setText(t_time)
         self._grid_layout.addWidget(self._lbl_time, 2, 1)
+
+    def update_message(self, message):
+        self.message = message
+        self.message_signal.emit(self.image, self.nickname, self.message, self.time)
 
     @property
     def layout(self):
