@@ -49,6 +49,13 @@ class TalkBox:
         self._lbl_time.setText(t_time)
         self._grid_layout.addWidget(self._lbl_time, 2, 1)
 
+        # _x = self.scroll_talk.verticalScrollBar().maximum()
+        # self.scroll_talk.verticalScrollBar().setValue(_x)
+
     @property
     def layout(self):
         return self._grid_layout
+
+    @property
+    def widget(self):
+        return self._lbl_talk

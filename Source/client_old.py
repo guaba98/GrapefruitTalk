@@ -19,7 +19,7 @@ class Client(Ui_MainWidget):
     port_num = 1121
     host_num = '10.10.20.103'  # socket.gethostbyname(socket.gethostname()) #'10.10.20.103' #socket.gethostbyname(socket.gethostname())
     print('호스트: ', host_num, '포트주소: ', port_num, '버퍼: ', buffer_num)
-    signal = pyqtSignal(str)
+    signal = pyqtSignal(str) # 여기에 인자들 갯수만큼 데이터 타입을 넣어 줌
     server_num = (host_num, port_num)  # 호스트와 포트 주소를 server_num 변수에 저장한다.
 
     def __init__(self, MainWindow, username):
@@ -32,6 +32,7 @@ class Client(Ui_MainWidget):
         self.socket_for_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect_to_server()
         self.check_validate_user(self.username)
+        self.siganl.connect(self) # addtalk을 넣으면 ###########################################################################
     def connect_to_server(self):
         """서버 소켓에 연결한다."""
         try:
@@ -117,10 +118,11 @@ class Client(Ui_MainWidget):
 
                     except:
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
-                        self.signal.emit(message.decode(self.format_type))
+                        self.signal.emit(message.decode(self.format_type)) # 여기에 Talkbox에 들어갈 인자들을 넣는다.
+
                         # self.signal.connect(self.handle_received_message)  # 추가
                         # self.signal.connect(self.handle_received_message)
-                        self.add_date_line()
+                        # self.add_date_line()
                         # talkbox = TalkBox("", "자몽자몽", 'text', datetime.now(), self.signal)
                         # self.layout_talk.addLayout(talkbox.layout)
 

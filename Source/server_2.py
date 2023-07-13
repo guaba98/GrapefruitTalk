@@ -51,7 +51,7 @@ class Server:
         if self.connected():
             # 연결된 모든 클라이언트에 데이터 발송
             for client in self.client.values():
-                client[0].sendall(pickle.dumps(data)) #요청한 데이터의 모든 버퍼 내용을 모두 전송한다.
+                client[0].sendall(pickle.dumps(data)) #요청한 데이터의 모든 버퍼 내용을 모두 전송한다. / 첫번째 값은 소켓, 두번째 값은 id -> 소켓에 데이터 전송
             return True
         else:
             return False

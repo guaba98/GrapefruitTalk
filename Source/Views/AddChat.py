@@ -27,8 +27,8 @@ class AddChat(QDialog):
 
         # --- 화면에 아이템 추가
         for i in range(50):
-            item = ListItem("닉네임", "이것은 상태창 상태창 상태창")
-            layout_1.addLayout(item.layout)
+            item = ListItem("아이디", "닉네임", "이것은 상태창 상태창 상태창")
+            layout_1.addWidget(item.frame)
             layout_1.addLayout(item.add_checkbox())
 
         # --- vbox에 추가
@@ -76,6 +76,6 @@ class AddChat(QDialog):
 
 if __name__ == '__main__':
     app = QApplication([])
-    dialog = MyDialog()
+    dialog = AddChat()
     dialog.show()
     app.exec_()
