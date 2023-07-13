@@ -131,7 +131,8 @@ class Ui_MainWidget(object):
         self.verticalLayout_2.addItem(spacerItem9)
         self.frame = QtWidgets.QFrame(self.page_join)
         self.frame.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;")
+"border-radius:5px;\n"
+"background: #FFF;")
         self.frame.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame.setLineWidth(5)
@@ -238,6 +239,8 @@ class Ui_MainWidget(object):
 "}")
         self.btn_join.setObjectName("btn_join")
         self.horizontalLayout_3.addWidget(self.btn_join)
+        spacerItem12 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem12)
         self.btn_join_cancel = QtWidgets.QPushButton(self.page_join)
         self.btn_join_cancel.setMinimumSize(QtCore.QSize(100, 30))
         self.btn_join_cancel.setStyleSheet("QPushButton{\n"
@@ -247,18 +250,18 @@ class Ui_MainWidget(object):
 "}")
         self.btn_join_cancel.setObjectName("btn_join_cancel")
         self.horizontalLayout_3.addWidget(self.btn_join_cancel)
-        spacerItem12 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem12)
+        spacerItem13 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem13)
         self.horizontalLayout_3.setStretch(0, 1)
-        self.horizontalLayout_3.setStretch(3, 1)
+        self.horizontalLayout_3.setStretch(4, 1)
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
-        spacerItem13 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem13)
+        spacerItem14 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem14)
         self.verticalLayout_2.setStretch(0, 1)
         self.verticalLayout_2.setStretch(6, 2)
         self.horizontalLayout_4.addLayout(self.verticalLayout_2)
-        spacerItem14 = QtWidgets.QSpacerItem(277, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem14)
+        spacerItem15 = QtWidgets.QSpacerItem(277, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem15)
         self.horizontalLayout_4.setStretch(0, 1)
         self.horizontalLayout_4.setStretch(2, 1)
         self.stack_main.addWidget(self.page_join)
@@ -277,62 +280,120 @@ class Ui_MainWidget(object):
         self.lbl_room_name = QtWidgets.QLabel(self.frame_2)
         self.lbl_room_name.setObjectName("lbl_room_name")
         self.horizontalLayout_5.addWidget(self.lbl_room_name)
-        spacerItem15 = QtWidgets.QSpacerItem(779, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_5.addItem(spacerItem15)
+        self.lbl_room_number = QtWidgets.QLabel(self.frame_2)
+        self.lbl_room_number.setText("")
+        self.lbl_room_number.setObjectName("lbl_room_number")
+        self.horizontalLayout_5.addWidget(self.lbl_room_number)
+        spacerItem16 = QtWidgets.QSpacerItem(779, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem16)
         self.btn_single = QtWidgets.QPushButton(self.frame_2)
-        self.btn_single.setStyleSheet("border: 1px solid lightgray;\n"
+        self.btn_single.setStyleSheet("QPushButton{\n"
+"border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
-"padding: 3px;")
+"padding: 3px;\n"
+"}\n"
+"\n"
+"QPushButton:Checked{\n"
+"border: 1px solid black;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}")
         self.btn_single.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../Images/btn_single.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("../../Images/btn_single.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_single.setIcon(icon)
         self.btn_single.setIconSize(QtCore.QSize(22, 22))
+        self.btn_single.setCheckable(True)
+        self.btn_single.setChecked(False)
         self.btn_single.setFlat(True)
         self.btn_single.setObjectName("btn_single")
         self.horizontalLayout_5.addWidget(self.btn_single)
         self.btn_multi = QtWidgets.QPushButton(self.frame_2)
-        self.btn_multi.setStyleSheet("border: 1px solid lightgray;\n"
+        self.btn_multi.setStyleSheet("QPushButton{\n"
+"border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
-"padding: 3px;")
+"padding: 3px;\n"
+"}\n"
+"\n"
+"QPushButton:Checked{\n"
+"border: 1px solid black;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}")
         self.btn_multi.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("../Images/btn_multi.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("../../Images/btn_multi.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_multi.setIcon(icon1)
         self.btn_multi.setIconSize(QtCore.QSize(22, 22))
+        self.btn_multi.setCheckable(True)
+        self.btn_multi.setChecked(True)
         self.btn_multi.setFlat(True)
         self.btn_multi.setObjectName("btn_multi")
         self.horizontalLayout_5.addWidget(self.btn_multi)
-        self.btn_menu = QtWidgets.QPushButton(self.frame_2)
-        self.btn_menu.setStyleSheet("border: 1px solid lightgray;\n"
+        self.btn_member = QtWidgets.QPushButton(self.frame_2)
+        self.btn_member.setStyleSheet("QPushButton{\n"
+"border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
-"padding: 3px;")
-        self.btn_menu.setText("")
+"padding: 3px;\n"
+"}\n"
+"\n"
+"QPushButton:Checked{\n"
+"border: 1px solid black;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}")
+        self.btn_member.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("../Images/btn_menu.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_menu.setIcon(icon2)
-        self.btn_menu.setIconSize(QtCore.QSize(22, 22))
-        self.btn_menu.setFlat(True)
-        self.btn_menu.setObjectName("btn_menu")
-        self.horizontalLayout_5.addWidget(self.btn_menu)
+        icon2.addPixmap(QtGui.QPixmap("../../Images/btn_member.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_member.setIcon(icon2)
+        self.btn_member.setIconSize(QtCore.QSize(22, 22))
+        self.btn_member.setCheckable(True)
+        self.btn_member.setFlat(True)
+        self.btn_member.setObjectName("btn_member")
+        self.horizontalLayout_5.addWidget(self.btn_member)
+        self.btn_friend = QtWidgets.QPushButton(self.frame_2)
+        self.btn_friend.setStyleSheet("QPushButton{\n"
+"border: 1px solid lightgray;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}\n"
+"\n"
+"QPushButton:Checked{\n"
+"border: 1px solid black;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}")
+        self.btn_friend.setText("")
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("../../Images/btn_friend.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_friend.setIcon(icon3)
+        self.btn_friend.setIconSize(QtCore.QSize(22, 22))
+        self.btn_friend.setCheckable(True)
+        self.btn_friend.setFlat(True)
+        self.btn_friend.setObjectName("btn_friend")
+        self.horizontalLayout_5.addWidget(self.btn_friend)
         self.verticalLayout_4.addWidget(self.frame_2)
         self.splitter = QtWidgets.QSplitter(self.page_talk)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("splitter")
-        self.frame_4 = QtWidgets.QFrame(self.splitter)
-        self.frame_4.setStyleSheet("")
-        self.frame_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_4.setObjectName("frame_4")
-        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.frame_4)
+        self.frame_room = QtWidgets.QFrame(self.splitter)
+        self.frame_room.setStyleSheet("QFrame{\n"
+"background-color:white;\n"
+"border-radius:5px;\n"
+"\n"
+"}")
+        self.frame_room.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_room.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_room.setObjectName("frame_room")
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.frame_room)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.scrollArea = QtWidgets.QScrollArea(self.frame_4)
+        self.scroll_talk = QtWidgets.QScrollArea(self.frame_room)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy)
-        self.scrollArea.setStyleSheet("QScrollArea {\n"
+        sizePolicy.setHeightForWidth(self.scroll_talk.sizePolicy().hasHeightForWidth())
+        self.scroll_talk.setSizePolicy(sizePolicy)
+        self.scroll_talk.setStyleSheet("QScrollArea {\n"
 "    border: None;\n"
 "    background-color:rgba(100, 100, 100, 100);\n"
 "}\n"
@@ -353,20 +414,30 @@ class Ui_MainWidget(object):
 "    border-radius:8px;\n"
 "\n"
 "}\n"
+"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"height: 0px;\n"
+"}\n"
+"QScrollBar::add-line:vertical {\n"
+"      border: none;\n"
+"      background: none;\n"
+"}\n"
+"\n"
 "QScrollBar::sub-line:vertical {\n"
-"    border: None;\n"
-"    background-color: white;\n"
-"    width:18px;\n"
-"    margin: 0 0 0 0;\n"
-"    border-radius: 0px;\n"
+"      border: none;\n"
+"      background: none;\n"
 "}")
-        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName("scrollArea")
+        self.scroll_talk.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll_talk.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_talk.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.scroll_talk.setWidgetResizable(True)
+        self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 948, 736))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 531, 738))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
+        self.scrollAreaWidgetContents.setSizePolicy(sizePolicy)
         self.scrollAreaWidgetContents.setStyleSheet("")
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
@@ -377,57 +448,96 @@ class Ui_MainWidget(object):
         self.layout_talk.setSpacing(20)
         self.layout_talk.setObjectName("layout_talk")
         self.verticalLayout_6.addLayout(self.layout_talk)
-        spacerItem16 = QtWidgets.QSpacerItem(20, 685, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_6.addItem(spacerItem16)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout_7.addWidget(self.scrollArea)
-        self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
-        self.edt_txt = QtWidgets.QLineEdit(self.frame_4)
+        spacerItem17 = QtWidgets.QSpacerItem(20, 685, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_6.addItem(spacerItem17)
+        self.scroll_talk.setWidget(self.scrollAreaWidgetContents)
+        self.verticalLayout_7.addWidget(self.scroll_talk)
+        self.layout_input = QtWidgets.QHBoxLayout()
+        self.layout_input.setObjectName("layout_input")
+        self.edt_txt = QtWidgets.QLineEdit(self.frame_room)
         self.edt_txt.setMinimumSize(QtCore.QSize(0, 30))
         self.edt_txt.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
 "padding:5px;")
         self.edt_txt.setObjectName("edt_txt")
-        self.horizontalLayout_6.addWidget(self.edt_txt)
-        self.btn_emoticon = QtWidgets.QPushButton(self.frame_4)
+        self.layout_input.addWidget(self.edt_txt)
+        self.btn_emoticon = QtWidgets.QPushButton(self.frame_room)
         self.btn_emoticon.setMinimumSize(QtCore.QSize(0, 30))
         self.btn_emoticon.setStyleSheet("border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_emoticon.setText("")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("../Images/btn_emoticon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_emoticon.setIcon(icon3)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("../../Images/btn_emoticon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_emoticon.setIcon(icon4)
         self.btn_emoticon.setIconSize(QtCore.QSize(22, 22))
         self.btn_emoticon.setFlat(True)
         self.btn_emoticon.setObjectName("btn_emoticon")
-        self.horizontalLayout_6.addWidget(self.btn_emoticon)
-        self.btn_send = QtWidgets.QPushButton(self.frame_4)
+        self.layout_input.addWidget(self.btn_emoticon)
+        self.btn_send = QtWidgets.QPushButton(self.frame_room)
         self.btn_send.setMinimumSize(QtCore.QSize(0, 30))
         self.btn_send.setStyleSheet("border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_send.setText("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_send.setIcon(icon4)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("../../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_send.setIcon(icon5)
         self.btn_send.setIconSize(QtCore.QSize(22, 22))
         self.btn_send.setFlat(True)
         self.btn_send.setObjectName("btn_send")
-        self.horizontalLayout_6.addWidget(self.btn_send)
-        self.verticalLayout_7.addLayout(self.horizontalLayout_6)
-        self.stack_menu = QtWidgets.QStackedWidget(self.splitter)
-        self.stack_menu.setObjectName("stack_menu")
-        self.page_single = QtWidgets.QWidget()
-        self.page_single.setObjectName("page_single")
-        self.stack_menu.addWidget(self.page_single)
-        self.page_multi = QtWidgets.QWidget()
-        self.page_multi.setObjectName("page_multi")
-        self.stack_menu.addWidget(self.page_multi)
-        self.page_setting = QtWidgets.QWidget()
-        self.page_setting.setObjectName("page_setting")
-        self.stack_menu.addWidget(self.page_setting)
+        self.layout_input.addWidget(self.btn_send)
+        self.verticalLayout_7.addLayout(self.layout_input)
+        self.verticalLayoutWidget = QtWidgets.QWidget(self.splitter)
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.layout_menu = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.layout_menu.setContentsMargins(9, 9, 9, 9)
+        self.layout_menu.setObjectName("layout_menu")
+        self.layout_list = QtWidgets.QVBoxLayout()
+        self.layout_list.setSpacing(15)
+        self.layout_list.setObjectName("layout_list")
+        self.layout_menu.addLayout(self.layout_list)
+        spacerItem18 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.layout_menu.addItem(spacerItem18)
+        self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        self.btn_out = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.btn_out.setStyleSheet("border: 1px solid lightgray;\n"
+"border-radius: 5px;\n"
+"padding: 3px;")
+        self.btn_out.setText("")
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap("../../Images/btn_out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_out.setIcon(icon6)
+        self.btn_out.setIconSize(QtCore.QSize(22, 22))
+        self.btn_out.setObjectName("btn_out")
+        self.horizontalLayout_7.addWidget(self.btn_out)
+        spacerItem19 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_7.addItem(spacerItem19)
+        self.btn_add = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.btn_add.setMinimumSize(QtCore.QSize(34, 30))
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        font.setBold(True)
+        font.setWeight(75)
+        self.btn_add.setFont(font)
+        self.btn_add.setStyleSheet("border: 1px solid lightgray;\n"
+"border-radius: 5px;\n"
+"padding: 3px;")
+        self.btn_add.setObjectName("btn_add")
+        self.horizontalLayout_7.addWidget(self.btn_add)
+        self.btn_setting = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.btn_setting.setStyleSheet("border: 1px solid lightgray;\n"
+"border-radius: 5px;\n"
+"padding: 3px;")
+        self.btn_setting.setText("")
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap("../../Images/btn_setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_setting.setIcon(icon7)
+        self.btn_setting.setIconSize(QtCore.QSize(22, 22))
+        self.btn_setting.setObjectName("btn_setting")
+        self.horizontalLayout_7.addWidget(self.btn_setting)
+        self.layout_menu.addLayout(self.horizontalLayout_7)
         self.verticalLayout_4.addWidget(self.splitter)
         self.verticalLayout_4.setStretch(1, 1)
         self.stack_main.addWidget(self.page_talk)
@@ -459,3 +569,4 @@ class Ui_MainWidget(object):
         self.btn_join.setText(_translate("MainWidget", "회원가입"))
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
+        self.btn_add.setText(_translate("MainWidget", "+"))
