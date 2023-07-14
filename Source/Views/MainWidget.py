@@ -776,10 +776,10 @@ class MainWidget(QWidget, Ui_MainWidget):
             # --- 친구 신청
             request_ = QLabel()
             request_.setFont(Font.button(3))
-            self.layout_request.addWidget(request_)
+            self.layout_list.addWidget(request_)
             item = ListItem(f"request0", "친구 후보", '')
             item.set_button_box(self.add_friend)
-            self.layout_request.addWidget(item.frame)
+            self.layout_list.addWidget(item.frame)
             reque_num = self.layout_list.count() - 1
             request_.setText(f"친구 요청 - {reque_num}명")
 
