@@ -38,6 +38,7 @@ class Server:
 
         print("[ 클라이언트 접속 ]")
         self.client[addr] = [sock, ""]
+        # 이 부분에 접속 DB 연결하기
 
         return sock, addr
 

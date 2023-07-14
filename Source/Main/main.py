@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtWidgets import QApplicationfdfjds
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFontDatabase
 
 from Source.Views.MainWidget import MainWidget
