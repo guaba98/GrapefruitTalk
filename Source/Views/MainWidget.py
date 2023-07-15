@@ -5,6 +5,7 @@ import random
 
 import pandas
 import pandas as pd
+import re
 
 #이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
 import smtplib
@@ -205,6 +206,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_duplicate_id_check.connect(self.check_id_txt)
         self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
+
+        # 여기에 스레드 (plus frind)내용을 받아서 정보에 내 이름이 있다면 레이아웃에 추가하는 함수 연결
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -514,8 +517,49 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.user_id}님 로그인 완료")
             self.dlg_warning.exec()
             self.set_page_talk()
+
+            # --- 여기서 호출
+            self.create_client_table(self.user_id)
+
+
             return True
 
+    def create_client_table(self, user_id):
+        """유저 아이디와 맞는 정보를 서버 db에서 가져와서 정보를 복사해 넣는다."""
+        # 서버 데이터베이스 연결
+        print('아니 여길 타냐고요 ,,,,,')
+        server_conn = sqlite3.connect('../Server/data.db')
+
+        # (조건 설정) 클라이언트 테이블: sql문
+        condition = {
+            'CTB_USER': f'SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM "TB_USER" WHERE USER_ID = "{user_id}"',
+            'CTB_FRIEND': f'SELECT USER_ID, FRID_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = "{user_id}"',
+            # 'TB_USER_CHATROOM': f'SELECT TB_CHATROOM.CR_ID, TB_CHATROOM.CR_NM FROM "TB_CHATROOM" LEFT OUTER JOIN '
+            #                     '"TB_USER_CHATROOM" ON "TB_CHATROOM"."CR_ID" = "TB_USER_CHATROOM"."CR_ID" '
+            #                     'WHERE "USER_ID" = "{user_id}" '
+            #                     'GROUP BY TB_CHATROOM.CR_ID',
+            'CTB_CHATROOM': f'SELECT CR_ID, CR_NM FROM "TB_CHATROOM" NATURAL JOIN '
+                            '"TB_USER_CHATROOM" '
+                            'WHERE "USER_ID" = "admin" '
+                            'GROUP BY TB_CHATROOM.CR_ID',
+            'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
+            # 'CTB_MESSAGE':
+        }
+
+        # 클라이언트 테이블 생성(있으면 삭제 후 추가)
+        client_conn = sqlite3.connect('../Client/data.db')
+        client_cursor = client_conn.cursor()
+        for c_table, query in condition.items():
+            client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
+            client_cursor.executescript(f'CREATE TABLE {c_table} ( id INT, name TEXT, email TEXT, password TEXT);)')
+            server_data = pd.read_sql_query(query, server_conn)
+            server_data.to_sql(c_table, client_conn, index=False)
+
+        # 변경사항 저장
+        client_conn.commit()
+
+        # 연결 종료
+        client_conn.close()
     # ================================================== 대화 화면 ==================================================
 
     # 채팅 화면 최초 출력
@@ -745,7 +789,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
+                item.set_context_menu("친구 추가 요청", self.friend_request)  # 내 아이디, 친구 아이디 전달
+                # 우클릭 메뉴 -> 여기에 내 아이디, 친구 아이디를 서버에 전달(plusfriend) -> 서버는 친구 아이디에게 내 아이디로 친구요청 하는 신호 보내야함
                 # self.current_list[item.item_id] = item
                 if i < 4:
                     self.layout_list.addWidget(item.frame)
@@ -898,16 +943,22 @@ class MainWidget(QWidget, Ui_MainWidget):
     def add_friend(self, t_type):
         self.delete_list_item(0)
         self.delete_list_item(1)
-        if t_type:
+        if t_type == 1:
             item = ListItem(f"friend{self.layout_list.count()-2}", "새 친구", "신선한 상태")
             item.set_context_menu("1:1 대화", self.move_single_chat, item)
             self.current_list[item.item_id] = item
             self.layout_list.addWidget(item.frame)
 
+
+        elif t_type == 0:
+            print('친구 요청을 거절했어요.')
+
+
     # 친구 추가 신청보내기
     @pyqtSlot()
     def friend_request(self):
         print("친구 신청!")
+        # 여기서 서버에 내 아이디, 요청한 친구 아이디르 서버에 넘겨줘야됨. (그리고 친구 신청한다는 시그널도)
 
     # 친구와 1:1 대화하기
     @pyqtSlot()

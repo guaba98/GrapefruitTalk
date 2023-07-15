@@ -2,22 +2,17 @@ import socket
 import pickle
 
 from Source.Server.DBConnector import DBConnector
-from Source.Client.DBConnector import DBConnector as c_db
-
-
 from Source.Main.DataClass import *
 
 from threading import Thread
 
-
 class Server:
     def __init__(self, port=1121, listener=10):
         self.db = DBConnector()
-        self.c_db = c_db()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
         # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
-        self.client: dict[tuple, list[socket.socket, str]] = {}
+        self.client : dict[tuple, list[socket.socket, str]] = {}
 
         # 서버 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,23 +45,31 @@ class Server:
     def disconnect(self, addr):
         # 접속 종료한 클라이언트의 정보가 존재한다면
         if addr in self.client:
+
             # 클라이언트 정보 삭제
             del self.client[addr]
 
-    # 데이터 전송
-    def send(self, sock: socket.socket, data):
-        print(sock)
-        # 데이터 타입에따른 데이터 전송
-        if type(data) in [ReqChat]:
-            self.send_message(data)
-        elif type(data) == str:
-            self.client[sock.getpeername()][1] = data
-            print(self.client[sock.getpeername()][1])
+    # 데이터 타입에따른 데이터 전송
+    def send(self, sock:socket.socket, data):
+        # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
+        if type(data) in [ReqChat, LoginInfo]:
+            self.send_exclude_sender(sock, data)
+
+        # 요청한 클라이언트에게 회신
         elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist]:
             self.send_client(sock, data)
+
+        # 클라이언트 로그인 요청 → 두 방식으로 발송해야해서 따로 나눔
         elif type(data) in [PerLogin]:
+            # 요청자에게 로그인 결과 발송
             self.send_client(sock, data)
-            self.db_log_inout_state_save(data.rescode, data.id, data.pw)
+            self.db_log_inout_state_save(data.rescode)
+
+            # 로그인 성공시
+            # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
+            if data.rescode == 2:
+                self.client[sock.getpeername()][1] = data.id
+                self.send_exclude_sender(sock, LoginInfo(data.id))
         # elif type(data) in [ReqMembership]:
 
     # 요청한 클라이언트에게만 전송
@@ -86,24 +89,24 @@ class Server:
         else:
             return False
 
-    # 발송자를 제외한 나머지 접속자에게 메시지 발송
-    def send_message(self, data: ReqChat):
+    # 발송자를 제외한 나머지 접속자에게 발송
+    def send_exclude_sender(self, sock: socket.socket, data):
+        print("send_exclude_sender")
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
-            # 연결된 모든 클라이언트에 데이터 발송
             for idx, client in enumerate(self.client.values()):
-                print(data.user_id, client[1])
-                if data.user_id != client[1]:
+                print(self.client[sock.getpeername()][1], client[1])
+                if self.client[sock.getpeername()][1] != client[1]:
                     client[0].sendall(pickle.dumps(data))
-
-                if idx == 0:
-                    self.db.insert_content(data)
+                #
+                # if idx == 0:
+                #     self.db.insert_content(data)
             return True
         else:
             return False
 
     # 데이터 수신
-    def recevie(self, sock: socket.socket):
+    def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         addr = sock.getpeername()
 
@@ -153,23 +156,14 @@ class Server:
         elif type(data) == ReqLogin:
             perdata: PerLogin = self.db.login(data)
             if perdata.rescode == 2:
-                self.client[sock.getpeername()][1] = perdata.id
-        # elif type(data) ==
+                self.client[sock.getpeername()][1] = perdata.user_id_
+                perdata.login_info = self.get_login_list()
 
-
-
-        # 읽지않은 메세지 - 이따가 츄라이 츄라이
-        elif type(data) == ReqCntNum:
-            perdata: ReqCntNum = self.c_db.
-
-        # # 개인 채팅방 목록 불러오기 -> 클라이언트에서 해야되는 부분인듯
-        # elif type(data) == CallSchatList:
-        #     perdata: CallSchatList = self.db_c.
-        #
-        # # 단체 채팅 목록 불러오기
-        # elif type(data) == CallGchatList:
-        #     pass
-
+        # 로그 아웃
+        elif type(data) == ReqLoout:
+            user_id = self.client[sock.getpeername()][1]
+            self.client[sock.getpeername()][1] = ""
+            perdata: LoginInfo([user_id], False)
 
         else:
             return data
@@ -179,14 +173,23 @@ class Server:
         print()
         return perdata
 
-    def db_log_inout_state_save(self, rescode, id, pw):
+    def get_login_list(self):
+        login_list = list()
+        for client in self.client.values():
+            if client[1] != "":
+                login_list.append(client[1])
+
+        print("login info")
+        print(login_list)
+
+        return login_list
+
+    def db_log_inout_state_save(self, rescode):
         """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
         sql_ = ''
         time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         print(time_)
         print(rescode)
-        print(id)
-        print(pw)
         if rescode == 2:
             sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time_}' WHERE USER_ID = '{id}'"
             self.db.conn.execute(sql_)
@@ -195,7 +198,7 @@ class Server:
         if not All_TB_LOG:
             print("예외처리 : TB_LOG에 아무것도 없습니다.")
 
-    def handler(self, sock, ):
+    def handler(self, sock,):
         while True:
             data = self.recevie(sock)
 
@@ -210,7 +213,6 @@ class Server:
             print("[ 데이터 처리 ]")
             self.send(sock, process_data)
             print("처리 완료")
-
 
 if __name__ == "__main__":
     server = Server()

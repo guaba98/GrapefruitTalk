@@ -1,8 +1,4 @@
 import sqlite3
-from datetime import datetime
-
-# 정규식 표현
-import re
 
 import pandas as pd
 
@@ -61,6 +57,11 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## CREATE TABLES ======================================================================== ##
 
+
+    # 여기에 함수 박기
+    # 서버 -> 클라이언트로 넘어오는(로그인 하자마자)
+
+
     # 테이블 초기 설정
     def init_tables(self):
         # 단체 방 정보추가
@@ -82,17 +83,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
 
     ## TB_USER ================================================================================ ##
-
-    # user_id를 기준으로 행 조회
-    def find_user_by_id(self, user_id: str):
-        row = self.conn.execute("select * from TB_USER where USER_ID = ?", (user_id,)).fetchall()
-        id = row[0]
-        return id
-
-    # user_id를 기준으로 행 삭제
-    def delete_user(self, user_id: str):
-        self.conn.execute("delete from TB_USER where USER_ID = ?", (user_id,))
-        self.commit_db()
 
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
@@ -131,25 +121,6 @@ class DBConnector:      # DB를 총괄하는 클래스
     def delete_friend(self, user_id, frd_id: str):
         self.conn.execute(f"delete from CTB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
         self.commit_db()
-
-    ## TB_log ================================================================================ ##
-    # LOG 정보 테이블 값 입력
-    def insert_log(self, user_id, login_time, logout_time):
-        self.conn.execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)", (user_id, login_time, logout_time))
-        self.commit_db()
-
-    # LOG 테이블 전체 조회
-    def find_log(self):
-        rows_data = self.conn.execute("select * from TB_LOG").fetchall()
-        if len(rows_data) == 0:
-            return None
-
-        find_result_list = list()
-        for row in rows_data:
-            find_result_list.append(row)
-        return rows_data
-
-    ## TB_chatroom ================================================================================ ##
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
@@ -212,11 +183,6 @@ class DBConnector:      # DB를 총괄하는 클래스
     def get_content(self, cr_id):
         df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
         return df
-
-    # def count_not_read_chatnum(self):
-        # 채팅방 맴버마다 마지막 확인시간을 기록해서 시간 사이의 수량을 계산
-
-
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
