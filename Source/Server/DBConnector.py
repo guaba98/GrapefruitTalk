@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 
 # 정규식 표현
 import re
@@ -107,13 +106,12 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute("delete from TB_USER where USER_ID = ?", (user_id,))
         self.commit_db()
 
-
     # 회원 ID, PW 결과값 가져오기
     def login(self, data: ReqLogin) -> PerLogin:
         print("[ login ]")
         """클라이언트 로그인 요청 -> 서버 로그인 허가 """
-        result: PerLogin = PerLogin(rescode=2, id=data.id, pw=data.password)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
+        result: PerLogin = PerLogin(rescode=2, user_id_=data.id_)
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}' AND USER_PW = '{data.password}'"
         df = pd.read_sql(sql, self.conn)
         row = len(df)
         print("row",row)
@@ -121,7 +119,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         if row in [None, 0]:
             result.rescode = 0
         # 입력한 아이디와 비밀번호, db에서 가진 아이디와 비밀번호
-        # elif data.id != row[1] or data.password != row[2]:
+        # elif data.id_ != row[1] or data.password != row[2]:
         #     result.rescode = 1
         else:
             result.rescode = 2
@@ -130,7 +128,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def membership_id_check(self, data: ReqDuplicateCheck) -> PerDuplicateCheck:
         """클라이언트 중복 아이디 확인 요청 -> 서버 db에서 아이디 중복 여부 응답"""
         result: PerDuplicateCheck = PerDuplicateCheck(isExisited=True)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}'"
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}'"
         row = pd.read_sql(sql, self.conn)
 
         if len(row) != 0:
@@ -159,10 +157,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         result: PerRegist = PerRegist(True)
         try:
             sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
-                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
+                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
+            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id_}');")
 
             self.conn.commit()
         except:
@@ -174,25 +172,18 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data:PlusFriend):
-        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
-        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)",
-                          get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
+    def insert_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
         self.commit_db()
 
-    # 친구 목록 가져오기
-    def get_all_friend(self, user_id):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}'", self.conn)
-        return df
-
-    # 수락/거절 조건에 따른 친구 조회
-    def get_accept_friend(self, user_id, accept=True):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}' and FRD_ACCEPT = {accept}", self.conn)
-        return df
+    # 친구 요청 결과 적용
+    def update_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
+        self.commit_db()
 
     # 친구 삭제
-    def delete_friend(self, user_id, frd_id: str):
-        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
+    def delete_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} FRD_ID = {data.frd_id_}")
         self.commit_db()
 
     ## TB_log ================================================================================ ##
@@ -229,6 +220,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         # 일련번호 부여
         df = pd.read_sql(f"select MAX(CR_ID) from TB_CHATROOM where CR_ID like '{_type}%'", self.conn)
         df = df["MAX(CR_ID)"].iloc[0]
+
         if df is None:
             _num = 1
         else:
@@ -242,11 +234,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"insert into TB_CHATROOM values (?, ?)", (_cr_id, data.title))
 
         # 방장 추가
-        self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id))
+        self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
         for member in data.member:
             self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
-
 
         # 대화 테이블 생성
         self.conn.execute(f""" CREATE TABLE TB_CONTENT_{_cr_id} (
@@ -260,19 +251,12 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         return df
 
-    def delete_table(self, data:DeleteTable):
-        pass
-        #TB_CHATROOM 의 CR_ID 삭제
-        #TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
-        #TB_READ_CNT_{CR_ID} 테이블 삭제
-        #TB_CONTENT_{CR_ID} 테이블 삭제
-
     ## TB_user_chatroom ================================================================================ ##
 
     # 방 맴버 정보 조회
     def find_user_chatroom(self, cr_id):
         df = pd.read_sql(f"select * from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
-        return df
+        return df["USER_ID"].values
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
@@ -288,9 +272,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 대화 추가
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
+        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id_} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
                          "values (?, ?, ?)",
-                         (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
+                         (data.user_id_, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
         self.commit_db()
         print("save complete")
@@ -300,33 +284,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
         return df
 
-    def create_tb_read_cnt(self, t_type, data:ReqCntNum):
-        """채팅방 별 메시지 읽음 구분 테이블 생성"""
-        # 필요인자 : CR_ID, USER_ID
-        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-
-        if t_type in [None, 'plus_chatroom']:
-            self.conn.executescript(f"""
-            CREATE TABLE IF NOT EXISTS "TB_READ_CNT_{data.cr_id}" (
-            "CR_ID" TEXT,
-            "USER_ID" TEXT,
-            "LAST_READ_TIME" TEXT,
-            FOREIGN KEY("USER_ID") REFERENCES "TB_CONTENT_{data.cr_id}"("USER_ID") );
-            """)
-
-            for i in range(len(data.user_id)):
-                self.conn.execute(f"""
-                INSERT INTO TB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[i]}, {now} ) ;
-                """)
-
-        elif t_type == 'plus_member':
-            # USER_ID[-1] : 채팅방에 마지막으로 추가된 참여멤버
-            self.conn.execute(f"""
-            INSERT INTO TB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[-1]}, {now} ) ;
-            """)
-
-        self.commit_db()
-        self.end_conn()
-
 if __name__ == "__main__":
+    # df = DBConnector().find_user_chatroom("PA_1")
+    # print()
     pass

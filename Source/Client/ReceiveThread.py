@@ -12,7 +12,9 @@ class ReceiveThread(QThread):
     res_emailcheck_2 = pyqtSignal(PerEmailNumber)
     res_regist = pyqtSignal(PerRegist)
     res_login = pyqtSignal(PerLogin)
-    res_plusfriend = pyqtSignal(PlusFriend)
+    res_friend = pyqtSignal(PerAcceptFriend)
+
+    login_info_updata = pyqtSignal(LoginInfo)
 
     def __init__(self, client:Client):
         super().__init__()
@@ -51,3 +53,9 @@ class ReceiveThread(QThread):
             elif type(data) == PerLogin:
                 self.res_login.emit(data)
 
+            elif type(data) == PerAcceptFriend:
+                self.res_friend.emit(data)
+
+            # 로그인시 유저 관련 정보 받기
+            elif type(data) == LoginInfo:
+                self.login_info_updata.emit(data)

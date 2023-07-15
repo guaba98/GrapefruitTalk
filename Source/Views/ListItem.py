@@ -76,8 +76,8 @@ class ListItem:
     @property
     def item_nm(self):
         nm_ = self._lbl_nick.text()
-        nm_ = nm_.lstrip("[ ")
-        nm_ = nm_.rstrip(" ]")
+        # nm_ = nm_.lstrip("[ ")
+        # nm_ = nm_.rstrip(" ]")
         return nm_
 
     @property
@@ -100,8 +100,20 @@ class ListItem:
             raise "Type Error: no_cnt only int."
 
     @property
+    def layout(self):
+        return self.frame.layout()
+
+    @property
     def frame(self):
         return self._frame
+
+    @property
+    def item_state(self):
+        return self._lbl_text.text()
+
+    # 방장 라벨 추가
+    def set_host(self):
+        self._lbl_profile.crown()
 
     def set_info(self, t_last:datetime, t_no_check:int):
         t_last = t_last.strftime("%H:%M")
@@ -113,12 +125,12 @@ class ListItem:
         _btn_yes = QPushButton()
         _btn_yes.setText("수락")
         _btn_yes.setFont(Font.text(3))
-        _btn_yes.clicked.connect(lambda _: t_func(1))
+        _btn_yes.clicked.connect(lambda _: t_func(1, self.item_id))
 
         _btn_no = QPushButton()
         _btn_no.setText("거절")
         _btn_no.setFont(Font.text(3))
-        _btn_no.clicked.connect(lambda _: t_func(0))
+        _btn_no.clicked.connect(lambda _: t_func(0, self.item_id))
 
         _box_layout = QHBoxLayout()
         _box_layout.addWidget(_btn_yes)
