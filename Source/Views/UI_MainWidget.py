@@ -144,40 +144,10 @@ class Ui_MainWidget(object):
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setSpacing(10)
         self.gridLayout.setObjectName("gridLayout")
-        self.edt_join_nick = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_nick.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_nick.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_nick.setObjectName("edt_join_nick")
-        self.gridLayout.addWidget(self.edt_join_nick, 4, 0, 1, 3)
         self.lbl_join_dot = QtWidgets.QLabel(self.frame)
         self.lbl_join_dot.setStyleSheet("border:solid;")
         self.lbl_join_dot.setObjectName("lbl_join_dot")
         self.gridLayout.addWidget(self.lbl_join_dot, 3, 1, 1, 1)
-        self.btn_join_id = QtWidgets.QPushButton(self.frame)
-        self.btn_join_id.setMinimumSize(QtCore.QSize(90, 30))
-        self.btn_join_id.setStyleSheet("QPushButton{\n"
-"background-color:white;\n"
-"border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"}")
-        self.btn_join_id.setObjectName("btn_join_id")
-        self.gridLayout.addWidget(self.btn_join_id, 0, 3, 1, 1)
-        self.edt_join_id = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_id.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_id.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_id.setObjectName("edt_join_id")
-        self.gridLayout.addWidget(self.edt_join_id, 0, 0, 1, 3)
-        self.edt_join_pwd1 = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_pwd1.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_pwd1.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_pwd1.setObjectName("edt_join_pwd1")
-        self.gridLayout.addWidget(self.edt_join_pwd1, 1, 0, 1, 3)
         self.cb_join_email = QtWidgets.QComboBox(self.frame)
         self.cb_join_email.setMinimumSize(QtCore.QSize(0, 30))
         self.cb_join_email.setStyleSheet("QComboBox{\n"
@@ -198,6 +168,45 @@ class Ui_MainWidget(object):
 "")
         self.cb_join_email.setObjectName("cb_join_email")
         self.gridLayout.addWidget(self.cb_join_email, 3, 2, 1, 1)
+        self.edt_join_nick = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_nick.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_nick.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_nick.setObjectName("edt_join_nick")
+        self.gridLayout.addWidget(self.edt_join_nick, 5, 0, 1, 3)
+        self.btn_join_mail = QtWidgets.QPushButton(self.frame)
+        self.btn_join_mail.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_join_mail.setStyleSheet("QPushButton{\n"
+"background-color:white;\n"
+"border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"}")
+        self.btn_join_mail.setObjectName("btn_join_mail")
+        self.gridLayout.addWidget(self.btn_join_mail, 3, 3, 1, 1)
+        self.btn_join_id = QtWidgets.QPushButton(self.frame)
+        self.btn_join_id.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_join_id.setStyleSheet("QPushButton{\n"
+"background-color:white;\n"
+"border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"}")
+        self.btn_join_id.setObjectName("btn_join_id")
+        self.gridLayout.addWidget(self.btn_join_id, 0, 3, 1, 1)
+        self.edt_join_pwd1 = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_pwd1.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_pwd1.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_pwd1.setObjectName("edt_join_pwd1")
+        self.gridLayout.addWidget(self.edt_join_pwd1, 1, 0, 1, 3)
+        self.edt_join_id = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_id.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_id.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_id.setObjectName("edt_join_id")
+        self.gridLayout.addWidget(self.edt_join_id, 0, 0, 1, 3)
         self.edt_join_email = QtWidgets.QLineEdit(self.frame)
         self.edt_join_email.setMinimumSize(QtCore.QSize(0, 30))
         self.edt_join_email.setStyleSheet("border:1px solid lightgray;\n"
@@ -212,15 +221,29 @@ class Ui_MainWidget(object):
 "padding:5px;")
         self.edt_join_pwd2.setObjectName("edt_join_pwd2")
         self.gridLayout.addWidget(self.edt_join_pwd2, 2, 0, 1, 3)
-        self.btn_join_mail = QtWidgets.QPushButton(self.frame)
-        self.btn_join_mail.setMinimumSize(QtCore.QSize(90, 30))
-        self.btn_join_mail.setStyleSheet("QPushButton{\n"
+        self.widget_email = QtWidgets.QWidget(self.frame)
+        self.widget_email.setStyleSheet("border:solid;")
+        self.widget_email.setObjectName("widget_email")
+        self.horizontalLayout_8 = QtWidgets.QHBoxLayout(self.widget_email)
+        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_8.setSpacing(9)
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.lbl_email_num = QtWidgets.QLineEdit(self.widget_email)
+        self.lbl_email_num.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.lbl_email_num.setObjectName("lbl_email_num")
+        self.horizontalLayout_8.addWidget(self.lbl_email_num)
+        self.btn_email_num = QtWidgets.QPushButton(self.widget_email)
+        self.btn_email_num.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_email_num.setStyleSheet("QPushButton{\n"
 "background-color:white;\n"
 "border:1px solid lightgray;\n"
 "border-radius:5px;\n"
 "}")
-        self.btn_join_mail.setObjectName("btn_join_mail")
-        self.gridLayout.addWidget(self.btn_join_mail, 3, 3, 1, 1)
+        self.btn_email_num.setObjectName("btn_email_num")
+        self.horizontalLayout_8.addWidget(self.btn_email_num)
+        self.gridLayout.addWidget(self.widget_email, 4, 0, 1, 4)
         self.gridLayout.setColumnStretch(0, 2)
         self.horizontalLayout.addLayout(self.gridLayout)
         self.verticalLayout_2.addWidget(self.frame)
@@ -276,17 +299,26 @@ class Ui_MainWidget(object):
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout(self.frame_2)
+        self.horizontalLayout_5.setContentsMargins(-1, 0, -1, 0)
+        self.horizontalLayout_5.setSpacing(0)
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.lbl_room_name = QtWidgets.QLabel(self.frame_2)
         self.lbl_room_name.setObjectName("lbl_room_name")
         self.horizontalLayout_5.addWidget(self.lbl_room_name)
         self.lbl_room_number = QtWidgets.QLabel(self.frame_2)
+        self.lbl_room_number.setStyleSheet("padding-left: 8px;")
         self.lbl_room_number.setText("")
         self.lbl_room_number.setObjectName("lbl_room_number")
         self.horizontalLayout_5.addWidget(self.lbl_room_number)
         spacerItem16 = QtWidgets.QSpacerItem(779, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem16)
-        self.btn_single = QtWidgets.QPushButton(self.frame_2)
+        self.box_single = QtWidgets.QWidget(self.frame_2)
+        self.box_single.setObjectName("box_single")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.box_single)
+        self.horizontalLayout_6.setContentsMargins(5, 9, 5, 9)
+        self.horizontalLayout_6.setSpacing(0)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        self.btn_single = QtWidgets.QPushButton(self.box_single)
         self.btn_single.setStyleSheet("QPushButton{\n"
 "border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
@@ -307,8 +339,15 @@ class Ui_MainWidget(object):
         self.btn_single.setChecked(False)
         self.btn_single.setFlat(True)
         self.btn_single.setObjectName("btn_single")
-        self.horizontalLayout_5.addWidget(self.btn_single)
-        self.btn_multi = QtWidgets.QPushButton(self.frame_2)
+        self.horizontalLayout_6.addWidget(self.btn_single)
+        self.horizontalLayout_5.addWidget(self.box_single)
+        self.box_multi = QtWidgets.QWidget(self.frame_2)
+        self.box_multi.setObjectName("box_multi")
+        self.horizontalLayout_9 = QtWidgets.QHBoxLayout(self.box_multi)
+        self.horizontalLayout_9.setContentsMargins(5, -1, 5, -1)
+        self.horizontalLayout_9.setSpacing(0)
+        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
+        self.btn_multi = QtWidgets.QPushButton(self.box_multi)
         self.btn_multi.setStyleSheet("QPushButton{\n"
 "border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
@@ -329,8 +368,15 @@ class Ui_MainWidget(object):
         self.btn_multi.setChecked(True)
         self.btn_multi.setFlat(True)
         self.btn_multi.setObjectName("btn_multi")
-        self.horizontalLayout_5.addWidget(self.btn_multi)
-        self.btn_member = QtWidgets.QPushButton(self.frame_2)
+        self.horizontalLayout_9.addWidget(self.btn_multi)
+        self.horizontalLayout_5.addWidget(self.box_multi)
+        self.box_member = QtWidgets.QWidget(self.frame_2)
+        self.box_member.setObjectName("box_member")
+        self.horizontalLayout_10 = QtWidgets.QHBoxLayout(self.box_member)
+        self.horizontalLayout_10.setContentsMargins(5, -1, 5, -1)
+        self.horizontalLayout_10.setSpacing(0)
+        self.horizontalLayout_10.setObjectName("horizontalLayout_10")
+        self.btn_member = QtWidgets.QPushButton(self.box_member)
         self.btn_member.setStyleSheet("QPushButton{\n"
 "border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
@@ -350,8 +396,15 @@ class Ui_MainWidget(object):
         self.btn_member.setCheckable(True)
         self.btn_member.setFlat(True)
         self.btn_member.setObjectName("btn_member")
-        self.horizontalLayout_5.addWidget(self.btn_member)
-        self.btn_friend = QtWidgets.QPushButton(self.frame_2)
+        self.horizontalLayout_10.addWidget(self.btn_member)
+        self.horizontalLayout_5.addWidget(self.box_member)
+        self.box_friend = QtWidgets.QWidget(self.frame_2)
+        self.box_friend.setObjectName("box_friend")
+        self.horizontalLayout_11 = QtWidgets.QHBoxLayout(self.box_friend)
+        self.horizontalLayout_11.setContentsMargins(5, -1, 5, -1)
+        self.horizontalLayout_11.setSpacing(0)
+        self.horizontalLayout_11.setObjectName("horizontalLayout_11")
+        self.btn_friend = QtWidgets.QPushButton(self.box_friend)
         self.btn_friend.setStyleSheet("QPushButton{\n"
 "border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
@@ -371,7 +424,8 @@ class Ui_MainWidget(object):
         self.btn_friend.setCheckable(True)
         self.btn_friend.setFlat(True)
         self.btn_friend.setObjectName("btn_friend")
-        self.horizontalLayout_5.addWidget(self.btn_friend)
+        self.horizontalLayout_11.addWidget(self.btn_friend)
+        self.horizontalLayout_5.addWidget(self.box_friend)
         self.verticalLayout_4.addWidget(self.frame_2)
         self.splitter = QtWidgets.QSplitter(self.page_talk)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
@@ -432,7 +486,7 @@ class Ui_MainWidget(object):
         self.scroll_talk.setWidgetResizable(True)
         self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 531, 738))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 532, 738))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -492,8 +546,10 @@ class Ui_MainWidget(object):
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.layout_menu = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.layout_menu.setContentsMargins(9, 9, 9, 9)
+        self.layout_menu.setSpacing(0)
         self.layout_menu.setObjectName("layout_menu")
         self.layout_list = QtWidgets.QVBoxLayout()
+        self.layout_list.setContentsMargins(-1, -1, -1, 0)
         self.layout_list.setSpacing(15)
         self.layout_list.setObjectName("layout_list")
         self.layout_menu.addLayout(self.layout_list)
@@ -546,6 +602,31 @@ class Ui_MainWidget(object):
         self.retranslateUi(MainWidget)
         self.stack_main.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWidget)
+        MainWidget.setTabOrder(self.edt_join_id, self.btn_join_id)
+        MainWidget.setTabOrder(self.btn_join_id, self.edt_join_pwd1)
+        MainWidget.setTabOrder(self.edt_join_pwd1, self.edt_join_pwd2)
+        MainWidget.setTabOrder(self.edt_join_pwd2, self.edt_join_email)
+        MainWidget.setTabOrder(self.edt_join_email, self.cb_join_email)
+        MainWidget.setTabOrder(self.cb_join_email, self.btn_join_mail)
+        MainWidget.setTabOrder(self.btn_join_mail, self.lbl_email_num)
+        MainWidget.setTabOrder(self.lbl_email_num, self.btn_email_num)
+        MainWidget.setTabOrder(self.btn_email_num, self.edt_join_nick)
+        MainWidget.setTabOrder(self.edt_join_nick, self.btn_join)
+        MainWidget.setTabOrder(self.btn_join, self.btn_join_cancel)
+        MainWidget.setTabOrder(self.btn_join_cancel, self.edt_login_id)
+        MainWidget.setTabOrder(self.edt_login_id, self.edt_login_pwd)
+        MainWidget.setTabOrder(self.edt_login_pwd, self.btn_login)
+        MainWidget.setTabOrder(self.btn_login, self.btn_single)
+        MainWidget.setTabOrder(self.btn_single, self.btn_multi)
+        MainWidget.setTabOrder(self.btn_multi, self.btn_member)
+        MainWidget.setTabOrder(self.btn_member, self.btn_friend)
+        MainWidget.setTabOrder(self.btn_friend, self.scroll_talk)
+        MainWidget.setTabOrder(self.scroll_talk, self.edt_txt)
+        MainWidget.setTabOrder(self.edt_txt, self.btn_emoticon)
+        MainWidget.setTabOrder(self.btn_emoticon, self.btn_send)
+        MainWidget.setTabOrder(self.btn_send, self.btn_out)
+        MainWidget.setTabOrder(self.btn_out, self.btn_add)
+        MainWidget.setTabOrder(self.btn_add, self.btn_setting)
 
     def retranslateUi(self, MainWidget):
         _translate = QtCore.QCoreApplication.translate
@@ -558,15 +639,26 @@ class Ui_MainWidget(object):
         self.btn_login.setText(_translate("MainWidget", "로그인"))
         self.lbl_join.setText(_translate("MainWidget", "회원가입"))
         self.lbl_join_title.setText(_translate("MainWidget", "회원가입"))
-        self.edt_join_nick.setPlaceholderText(_translate("MainWidget", "닉네임 (최대20자)"))
         self.lbl_join_dot.setText(_translate("MainWidget", "@"))
+        self.edt_join_nick.setPlaceholderText(_translate("MainWidget", "닉네임 (최대20자)"))
+        self.btn_join_mail.setText(_translate("MainWidget", "인증 메일 발송"))
         self.btn_join_id.setText(_translate("MainWidget", "중복확인"))
-        self.edt_join_id.setPlaceholderText(_translate("MainWidget", "아이디"))
-        self.edt_join_pwd1.setPlaceholderText(_translate("MainWidget", "비밀번호 (영대문자,숫자,특수문자 필수,5~16자)"))
+        self.edt_join_pwd1.setPlaceholderText(_translate("MainWidget", "비밀번호 (영대문자,특수문자 필수,5~16자)"))
+        self.edt_join_id.setPlaceholderText(_translate("MainWidget", "아이디 (5~16자)"))
         self.edt_join_email.setPlaceholderText(_translate("MainWidget", "이메일"))
         self.edt_join_pwd2.setPlaceholderText(_translate("MainWidget", "비밀번호 확인"))
-        self.btn_join_mail.setText(_translate("MainWidget", "인증 메일 발송"))
+        self.btn_email_num.setText(_translate("MainWidget", "인증번호 확인"))
         self.btn_join.setText(_translate("MainWidget", "회원가입"))
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())
