@@ -82,6 +82,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.connect_thread_signal()
             self.receive_thread.start()
 
+        self.db.count_not_read_chatnum('OA_1', ['admin', 'admin2', 'song030s', 'juyang', 'hyebin'])
+
     # 화면 글꼴 설정
     def set_font(self):
         font_txt_normal = Font.text(3)
@@ -171,8 +173,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join_id.clicked.connect(self.check_duplicate_id)
         self.edt_join_id.textEdited.connect(self.check_id_condition)
 
-        #비밀번호
-        #닉네임
 
         self.btn_join_mail.clicked.connect(self.check_email_info)
         self.btn_email_num.clicked.connect(self.check_varify_number)
@@ -189,6 +189,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_multi.clicked.connect(lambda: self.list_btn_check("multi"))
         self.btn_member.clicked.connect(lambda: self.list_btn_check("member"))
         self.btn_friend.clicked.connect(lambda: self.list_btn_check("friend"))
+        self.btn_friend.clicked.connect(self.add_friend)
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
 
@@ -205,6 +206,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_duplicate_id_check.connect(self.check_id_txt)
         self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
+
+        # 친구추가
+        # self.receive_thread.res_plusfriend.connect()
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -493,7 +497,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         pwd_ = self.edt_login_pwd.text()
 
         self.client.send(ReqLogin(self.user_id, pwd_))
-
+        #
         # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
         self.db.set_user_id(self.user_id)
         self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
@@ -745,7 +749,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
+                item.set_context_menu("친구 추가 요청", self.friend_request, item.item_id)  # 우클릭 메뉴
                 # self.current_list[item.item_id] = item
                 if i < 4:
                     self.layout_list.addWidget(item.frame)
@@ -898,16 +902,20 @@ class MainWidget(QWidget, Ui_MainWidget):
     def add_friend(self, t_type):
         self.delete_list_item(0)
         self.delete_list_item(1)
-        if t_type:
+        if t_type == 1:
             item = ListItem(f"friend{self.layout_list.count()-2}", "새 친구", "신선한 상태")
             item.set_context_menu("1:1 대화", self.move_single_chat, item)
             self.current_list[item.item_id] = item
             self.layout_list.addWidget(item.frame)
+        else:
+            pass
+
 
     # 친구 추가 신청보내기
     @pyqtSlot()
-    def friend_request(self):
-        print("친구 신청!")
+    def friend_request(self, item_id):
+        tuple_id = (self.user_id, item_id)
+        self.client.send(PlusFriend(tuple_id, True))
 
     # 친구와 1:1 대화하기
     @pyqtSlot()

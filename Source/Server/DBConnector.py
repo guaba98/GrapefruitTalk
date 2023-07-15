@@ -174,8 +174,10 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data:ReqSuggetsFriend):
-        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+    def insert_friend(self, data:PlusFriend):
+        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
+        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)",
+                          get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
         self.commit_db()
 
     # 친구 목록 가져오기
@@ -227,7 +229,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         # 일련번호 부여
         df = pd.read_sql(f"select MAX(CR_ID) from TB_CHATROOM where CR_ID like '{_type}%'", self.conn)
         df = df["MAX(CR_ID)"].iloc[0]
-
         if df is None:
             _num = 1
         else:
@@ -246,6 +247,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         for member in data.member:
             self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
+
         # 대화 테이블 생성
         self.conn.execute(f""" CREATE TABLE TB_CONTENT_{_cr_id} (
                             "USER_ID" TEXT,
@@ -257,6 +259,13 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.commit()
 
         return df
+
+    def delete_table(self, data:DeleteTable):
+        pass
+        #TB_CHATROOM 의 CR_ID 삭제
+        #TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
+        #TB_READ_CNT_{CR_ID} 테이블 삭제
+        #TB_CONTENT_{CR_ID} 테이블 삭제
 
     ## TB_user_chatroom ================================================================================ ##
 
@@ -290,6 +299,34 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select * from TB_CONTENT_{cr_id}", self.conn)
         self.commit_db()
         return df
+
+    def create_tb_read_cnt(self, t_type, data:ReqCntNum):
+        """채팅방 별 메시지 읽음 구분 테이블 생성"""
+        # 필요인자 : CR_ID, USER_ID
+        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+        if t_type in [None, 'plus_chatroom']:
+            self.conn.executescript(f"""
+            CREATE TABLE IF NOT EXISTS "TB_READ_CNT_{data.cr_id}" (
+            "CR_ID" TEXT,
+            "USER_ID" TEXT,
+            "LAST_READ_TIME" TEXT,
+            FOREIGN KEY("USER_ID") REFERENCES "TB_CONTENT_{data.cr_id}"("USER_ID") );
+            """)
+
+            for i in range(len(data.user_id)):
+                self.conn.execute(f"""
+                INSERT INTO TB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[i]}, {now} ) ;
+                """)
+
+        elif t_type == 'plus_member':
+            # USER_ID[-1] : 채팅방에 마지막으로 추가된 참여멤버
+            self.conn.execute(f"""
+            INSERT INTO TB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[-1]}, {now} ) ;
+            """)
+
+        self.commit_db()
+        self.end_conn()
 
 if __name__ == "__main__":
     pass

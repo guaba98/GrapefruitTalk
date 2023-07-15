@@ -63,12 +63,14 @@ class Server:
         elif type(data) == str:
             self.client[sock.getpeername()][1] = data
             print(self.client[sock.getpeername()][1])
-        elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist]:
+        elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist, PlusFriend]:
             self.send_client(sock, data)
         elif type(data) in [PerLogin]:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode, data.id, data.pw)
-        # elif type(data) in [ReqMembership]:
+        elif type(data) in [DeleteMyTable]:
+            # 00님이 퇴장했습니다를 알리기위해 : 접속인원 중 채팅방 참여멤버에게만 출력되도록 처리해야함.
+            self.send_exclude_sender(sock, data)
 
     # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):
@@ -87,18 +89,18 @@ class Server:
         else:
             return False
 
-    # 발송자를 제외한 나머지 접속자에게 메시지 발송
-    def send_message(self, data:ReqChat):
+    # 발송자를 제외한 나머지 접속자에게 발송
+    def send_exclude_sender(self, sock: socket.socket, data):
+        print("send_exclude_sender")
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
-            # 연결된 모든 클라이언트에 데이터 발송
             for idx, client in enumerate(self.client.values()):
-                print(data.user_id, client[1])
-                if data.user_id != client[1]:
+                print(self.client[sock.getpeername()][1], client[1])
+                if self.client[sock.getpeername()][1] != client[1]:
                     client[0].sendall(pickle.dumps(data))
-
-                if idx == 0:
-                    self.db.insert_content(data)
+                #
+                # if idx == 0:
+                #     self.db.insert_content(data)
             return True
         else:
             return False
@@ -126,6 +128,7 @@ class Server:
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
+        print("before")
         print(f"process_data : {type(data)}")
         print("data", get_data_tuple(data))
         print()
@@ -156,22 +159,19 @@ class Server:
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.id
 
-        # 읽지않은 메세지 - 이따가 츄라이 츄라이
-        elif type(data) == ReqCntNum:
-            perdata: ReqCntNum = self.c_db.
-
-        # # 개인 채팅방 목록 불러오기 -> 클라이언트에서 해야되는 부분인듯
-        # elif type(data) == CallSchatList:
-        #     perdata: CallSchatList = self.db_c.
-        #
-        # # 단체 채팅 목록 불러오기
-        # elif type(data) == CallGchatList:
-        #     pass
-
-
-        else:
+        elif type(data) == DeleteMyTable:
             return data
 
+        elif type(data) == DeleteTable:
+            return data
+
+        elif type(data) == DeleteMyTable:
+            return data
+
+        # else:
+        #     return data
+
+        print("after")
         print(f"process_data : {type(perdata)}")
         print("perdata", get_data_tuple(data))
         print()

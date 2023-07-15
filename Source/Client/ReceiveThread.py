@@ -12,9 +12,7 @@ class ReceiveThread(QThread):
     res_emailcheck_2 = pyqtSignal(PerEmailNumber)
     res_regist = pyqtSignal(PerRegist)
     res_login = pyqtSignal(PerLogin)
-
-
-
+    res_plusfriend = pyqtSignal(PlusFriend)
 
     def __init__(self, client:Client):
         super().__init__()
@@ -52,3 +50,4 @@ class ReceiveThread(QThread):
             # 로그인 결과
             elif type(data) == PerLogin:
                 self.res_login.emit(data)
+

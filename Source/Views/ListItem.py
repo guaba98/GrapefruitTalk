@@ -118,7 +118,7 @@ class ListItem:
         _btn_no = QPushButton()
         _btn_no.setText("거절")
         _btn_no.setFont(Font.text(3))
-        _btn_yes.clicked.connect(lambda _: t_func(0))
+        _btn_no.clicked.connect(lambda _: t_func(0))
 
         _box_layout = QHBoxLayout()
         _box_layout.addWidget(_btn_yes)

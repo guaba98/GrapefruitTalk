@@ -1,5 +1,6 @@
 import sqlite3
-from datetime import datetime
+import datetime
+from datetime import timedelta
 
 # 정규식 표현
 import re
@@ -113,8 +114,10 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data:ReqSuggetsFriend):
-        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+    def insert_friend(self, data:PlusFriend):
+        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
+        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
+                          "values (?, ?, ?)", get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
         self.commit_db()
 
     # 친구 목록 가져오기
@@ -198,6 +201,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         return df
 
+    def delete_my_table(self, data:DeleteMyTable):
+        pass
+        #CTB_CHATROOM 의 CR_ID 삭제
+        #CTB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
+        #CTB_READ_CNT_{CR_ID} 테이블 삭제
+        #CTB_CONTENT_{CR_ID} 테이블 삭제
+
     ## TB_content ================================================================================ ##
     # 대화 추가
     def insert_content(self, data:ReqChat):
@@ -213,10 +223,46 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
         return df
 
-    # def count_not_read_chatnum(self):
-        # 채팅방 맴버마다 마지막 확인시간을 기록해서 시간 사이의 수량을 계산
+    def update_last_read_time(self, cr_id, user_id):
+        """유저가 방을 열때마다 안읽은 날짜를 갱신한다"""
 
+        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
+        sql = f"UPDATE CTB_READ_CNT_{cr_id} SET LAST_READ_TIME = {now} WHERE USER_ID = {user_id}"
+        self.conn.execute(sql)
+        self.end_conn()
 
+    def count_not_read_chatnum(self, cr_id, user_id_list):
+        """유저별로 읽지 않음 메세지 수량을 계산한다"""
+        # 필요인자 : CR_ID, USER_ID
+        print(cr_id)
+        print(user_id_list)
+
+        # now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
+        formatted_time_list = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchall()
+        dict_id_cnt = {}
+
+        last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1").fetchone()[0]
+
+        for i in range(len(user_id_list)):
+            formatted_time = formatted_time_list[i][0]
+            print(f"{user_id_list[i]}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
+            print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
+            #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
+            #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
+            cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
+                                    f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
+                                    f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
+                                    f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
+                                    f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
+
+            dict_id_cnt[f'{user_id_list[i]}'] = len(cnt)
+
+        # 결과 출력
+        for user_id, count in dict_id_cnt.items():
+            print(f"User ID: {user_id}, Unread Message Count: {count}")
+        # return : {'유저아이디' :  안읽은 메세지 수}
+        return dict_id_cnt
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 

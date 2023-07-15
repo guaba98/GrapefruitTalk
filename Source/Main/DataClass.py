@@ -6,14 +6,11 @@ import pandas
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트
 
-# 읽지않은 메세지
-# 유저아이디, 채팅방 번호(타입), 채팅방 출입여부
+# 읽지않은 메세지 출력 요청
 class ReqCntNum:
-    def __init__(self, id:str, chat_room: str, is_read: int):
-        self.id = id
-        self.chat_room = chat_room
-        self.is_read = is_read
-
+    def __init__(self, cr_id:str, user_id: list): #채팅방 참여 멤버의 아이디는 list에 담김
+        self.cr_id = cr_id
+        self.user_id = user_id
 
 # 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 개인 채팅방 목록을 불러온다.
 # 채팅방 번호(타입), 채팅방 멤버
@@ -55,6 +52,7 @@ class ReqSaveChat:
 class PlusFriend:
     def __init__(self, id_tuple: tuple, result: bool):
         self.id_tuple = id_tuple
+        self.result = result
 
 # 로그아웃을 하면 접속상태를 0으로 변경시킨다.
 class ReqLogout:
@@ -74,13 +72,6 @@ class ReqImgChange:
     def __init__(self, user_id: str, user_profile_path: str):
         self.user_id = user_id
         self.user_profile_path = user_profile_path
-
-# 대화방을 나가면 대화방과 대화내용(메세지)이 삭제된다.
-# 유저 아이디, 대화방 아이디
-class DeleteChat:
-    def __init__(self, id: str, cr_id: str):
-        self.id = id
-        self.cr_id = cr_id
 
 # 친구 리스트가 우측에 출력된다.
 # 사용자 프로필, 친구 이름, 접속 상태
@@ -103,9 +94,6 @@ class DeleteMyTable:
 class DeleteTable:
     def __init__(self, cr_id: str):
         self.cr_id = cr_id
-
-
-
 
 # ==================== 로그인
 

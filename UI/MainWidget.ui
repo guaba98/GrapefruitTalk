@@ -796,6 +796,13 @@ border-radius:5px;
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="btn_test">
+            <property name="text">
+             <string>test</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QWidget" name="box_single" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <property name="spacing">
