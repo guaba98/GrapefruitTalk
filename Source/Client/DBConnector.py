@@ -94,26 +94,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute("delete from TB_USER where USER_ID = ?", (user_id,))
         self.commit_db()
 
-
-    # 회원 ID, PW 결과값 가져오기
-    def login(self, data: ReqLogin) -> PerLogin:
-        print("[ login ]")
-        """클라이언트 로그인 요청 -> 서버 로그인 허가 """
-        result: PerLogin = PerLogin(rescode=2, id=data.id, pw=data.password)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
-        df = pd.read_sql(sql, self.conn)
-        row = len(df)
-        print("row",row)
-
-        if row in [None, 0]:
-            result.rescode = 0
-        # 입력한 아이디와 비밀번호, db에서 가진 아이디와 비밀번호
-        # elif data.id != row[1] or data.password != row[2]:
-        #     result.rescode = 1
-        else:
-            result.rescode = 2
-        return result
-
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
         try:
@@ -218,23 +198,6 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         return df
 
-    ## TB_user_chatroom ================================================================================ ##
-
-    # 방 맴버 정보 조회
-    def get_chatroom_title(self, cr_id):
-        df = pd.read_sql(f"select CR_NM from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
-        return df["CR_NM"].iloc[0]
-
-    # 유저의 방 정보 조회
-    def find_user_chatroom_by_to(self, user_id):
-        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}", self.conn)
-        return df
-
-    # 채팅방 나가기
-    def delete_chatroom_member(self, cr_id: str, user_id):
-        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
-        self.commit_db()
-
     ## TB_content ================================================================================ ##
     # 대화 추가
     def insert_content(self, data:ReqChat):
@@ -249,6 +212,11 @@ class DBConnector:      # DB를 총괄하는 클래스
     def get_content(self, cr_id):
         df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
         return df
+
+    # def count_not_read_chatnum(self):
+        # 채팅방 맴버마다 마지막 확인시간을 기록해서 시간 사이의 수량을 계산
+
+
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
