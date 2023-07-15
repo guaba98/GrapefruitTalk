@@ -8,7 +8,7 @@ from threading import Thread
 
 
 class Server:
-    def __init__(self, port=1121, listener=1):
+    def __init__(self, port=1005, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -38,7 +38,7 @@ class Server:
 
         print("[ 클라이언트 접속 ]")
         self.client[addr] = [sock, ""]
-        # 이 부분에 접속 DB 연결하기
+        print()
 
         return sock, addr
 
@@ -64,16 +64,7 @@ class Server:
         elif type(data) in [PerLogin]:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode, data.id, data.pw)
-
-        # 소연 추가 부분
-        # elif type(data) in [PerChat]: # 채팅 송신 허가 응답
-        #     self.send_client(sock, data)
-        # elif type(data) in [Per]
-
-
         # elif type(data) in [ReqMembership]:
-
-
 
     # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):
@@ -97,10 +88,12 @@ class Server:
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
             # 연결된 모든 클라이언트에 데이터 발송
-            for client in self.client.values():
+            for idx, client in enumerate(self.client.values()):
                 print(data.user_id, client[1])
                 if data.user_id != client[1]:
                     client[0].sendall(pickle.dumps(data))
+
+                if idx == 0:
                     self.db.insert_content(data)
             return True
         else:
@@ -129,7 +122,9 @@ class Server:
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
-        print(f"process_data : {data}")
+        print(f"process_data : {type(data)}")
+        print("data", get_data_tuple(data))
+        print()
 
         # 채팅 발송
         if type(data) == ReqChat:
@@ -157,18 +152,12 @@ class Server:
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.id
 
-        # # 읽지않은 메세지 확인 - 이건 이따 트라이 트라이
-        # elif type(data) == ReqCntNum:
-        #     perdata: ReqCntNum = self.
-
-        # 개인 채팅방 목록 불러오기
-        elif type(data) == CallSchatList:
-            perdata: CallSchatList = self.db
-
         else:
             return data
 
-        print(f"process_data : {perdata}")
+        print(f"process_data : {type(perdata)}")
+        print("perdata", get_data_tuple(data))
+        print()
         return perdata
 
     def db_log_inout_state_save(self, rescode, id, pw):
@@ -198,6 +187,7 @@ class Server:
             # 수신된 데이터에 따른 결과 반환값을 클라이언트로 보내주기
             print(data)
             process_data = self.process_data(sock, data)
+
             print("[ 데이터 처리 ]")
             self.send(sock, process_data)
             print("처리 완료")

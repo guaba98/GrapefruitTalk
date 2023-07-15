@@ -2,6 +2,8 @@ import sqlite3
 
 from datetime import datetime
 import random
+
+import pandas
 import pandas as pd
 
 #이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
@@ -33,23 +35,25 @@ class MainWidget(QWidget, Ui_MainWidget):
         super().__init__()
         self.setupUi(self)
 
-        # 화면 초기화
+        # ----- 화면 초기화
         self.set_ui()
         self.set_theme_color()
 
-        # 변수 및 위젯 선언
+        # ----- 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
         self.dlg_add_chat = AddChat()
 
+        # 유저정보
         self.user_id = ""
         self.room_id = "PA_1"
+        self.user_info:pandas.DataFrame
 
-        # DB연결
-        self.db = DBConnector()
-
+        # ----- UI 관련 변수
         # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
+        self.list_info:pandas.DataFrame
         self.current_list = dict()
 
+        # ----- 회원가입 관련 변수
         # 회원가입 요건 충족
         self.r_email = ''
         self.v_num = ''
@@ -64,6 +68,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 이벤트 연결
         self.connect_event()
 
+        # DB연결
+        self.db = DBConnector()
+
         # 서버 연결
         self.client = Client()
         if not self.client.connect():
@@ -74,7 +81,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.address = self.client.address()
             self.connect_thread_signal()
             self.receive_thread.start()
-
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -474,7 +480,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         if data.Success:
             self.dlg_warning.set_dialog_type(2, "success_join_membership")
             if self.dlg_warning.exec():
-                self.db.set_user_id(self.user_id)
                 self.set_page_talk()
         else:
             self.dlg_warning.set_dialog_type(2, "failed_join_membership")
@@ -484,11 +489,16 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def check_login_info(self):
         """send : 로그인 정보"""
-        self.id_ = self.edt_login_id.text()
-        self.pwd_ = self.edt_login_pwd.text()
-        self.client.send(ReqLogin(self.id_, self.pwd_))
-        # --- UI 확인을 위한 채팅 화면 임시 호출
-        self.set_page_talk()
+        self.user_id = self.edt_login_id.text()
+        pwd_ = self.edt_login_pwd.text()
+
+        self.client.send(ReqLogin(self.user_id, pwd_))
+
+        # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
+        self.db.set_user_id(self.user_id)
+        self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
+        print(self.user_info)
+
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
@@ -501,7 +511,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.dlg_warning.exec()
             return False
         else:
-            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.id_}님 로그인 완료")
+            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.user_id}님 로그인 완료")
             self.dlg_warning.exec()
             self.set_page_talk()
             return True
@@ -529,10 +539,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         """
         :param t_room_id: ListItem.item_id
         """
+        self.room_id = t_room_id
+
         target_: ListItem = self.current_list[t_room_id]
         target_.no_msg_cnt = 0
         self.lbl_room_name.setObjectName(t_room_id)
         self.lbl_room_name.setText(f"{target_.item_nm}")
+
         # 채팅방 아이디로 조건 분기
         if "OA" in t_room_id:
             self.check_no_msg_cnt("multi")
@@ -542,12 +555,13 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.lbl_room_number.clear()
         # --- 임시 채팅방 데이터 설정
         self.clear_layout(self.layout_talk)
-        self.add_date_line()
-        self.add_notice_line(f"{self.user_id}")
-        num_ = random.randrange(3, 8)
-        text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-        for i in range(num_):
-            self.add_talk(0, "자몽자몽", text, datetime.now())
+        # self.add_date_line()
+        # self.add_notice_line(f"{self.user_id}")
+        # num_ = random.randrange(3, 8)
+        # text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        chat_data = self.db.get_content(t_room_id)
+        for i, data in chat_data.iterrows():
+            self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
         # --- 스크롤 테스트 중
         self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
@@ -573,9 +587,11 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.check_banchat():
             # widget = self.add_talk(0, "발송", text, datetime.now())
-            if self.client.send(ReqChat("cr_id", self.user_id, text)):
+            chat = ReqChat(self.room_id, self.user_id, text)
+            if self.client.send(chat):
+                self.db.insert_content(chat)
                 print("발송 완료")
-                self.add_talk(0, "발송", text, datetime.now())
+                self.add_talk(self.user_info["USER_IMG"], self.user_info["USER_NM"], text, datetime.now())
                 pass
 
             QtTest.QTest.qWait(100)
@@ -591,7 +607,7 @@ class MainWidget(QWidget, Ui_MainWidget):
     def check_banchat(self):
         text = self.edt_txt.text()
 
-        banchat_df = self.db.get_table("TB_BANCHAT")
+        banchat_df = self.db.get_table("CTB_BANCHAT")
 
         for i, banchat in banchat_df.iterrows():
             if text == banchat_df.BC_CONTENT[i]:
@@ -601,7 +617,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 메시지 수신
     def receive_message(self, data: ReqChat):
-        self.add_talk(0, data.user_id, data.msg, datetime.now())
+        self.add_talk(self, data.user_id, data.msg, datetime.now())
 
     # ==============================================================================================================
 
@@ -668,6 +684,14 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 리스트 메뉴 초기화
     def init_list(self, t_type):
         self.btn_add.setVisible(True)
+
+        if t_type == "member":
+            self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
+        else:
+            self.list_info = self.db.get_list_menu_info(t_type)
+        print("read db - list info")
+        print(self.list_info)
+
         self.current_list = dict()  # dict 초기화
         # 1:1 갠톡방
         if t_type == "single":
@@ -678,8 +702,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             offline_items = list()
 
             # ListItem 객체 생성 : 접속 중 상태 확인 후 online 이면 바로 addwidget 아니면 offline 지역변수에 임보
-            for i in range(7):
-                item = ListItem(f"OE_{i:0>2}", f"개인방 {i+1}", "마지막 메시지 입니다.")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
@@ -702,13 +726,10 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 단체방
         elif t_type == "multi":
-            for i in range(5):
-                if not i:
-                    item = ListItem(f"PA_1", f"전체방", "마지막 메시지 입니다.")
-                else:
-                    item = ListItem(f"OA_{i:0>2}", f"단체방-{i}", "마지막 메시지 입니다.")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
-                item.member_cnt = 10 - i
+                item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 self.layout_list.addWidget(item.frame)
@@ -722,8 +743,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
             offline_items = list()
 
-            for i in range(6):
-                item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
                 # self.current_list[item.item_id] = item
                 if i < 4:
@@ -764,8 +785,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
             offline_items = list()
 
-            for i in range(6):
-                item = ListItem(f"friend{i}", "친구", "상태상태상태상태상태상태")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("1:1 대화", self.move_single_chat, item)
                 # self.current_list[item.item_id] = item
                 if i < 3:       # --------- 접속 중 구분 조건문 → 추후 수정
