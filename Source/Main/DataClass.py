@@ -6,107 +6,6 @@ import pandas
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트
 
-# 읽지않은 메세지
-# 유저아이디, 채팅방 번호(타입), 채팅방 출입여부
-class ReqCntNum:
-    def __init__(self, id:str, chat_room: str, is_read: int):
-        self.id = id
-        self.chat_room = chat_room
-        self.is_read = is_read
-
-
-# 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 개인 채팅방 목록을 불러온다.
-# 채팅방 번호(타입), 채팅방 멤버
-class CallSchatList:
-    def __init__(self, chat_room_id: str, chat_room_members: list):
-        self.chat_room = chat_room_id
-        self.chat_room_members = chat_room_members
-
-# 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 단체 채팅방 목록을 불러온다.
-# 채팅방 번호(타입), 채팅방 멤버
-class CallGchatList:
-    def __init__(self, chat_room_id: str, chat_room_members: list):
-        self.chat_room = chat_room_id
-        self.chat_room_members = chat_room_members
-
-# 참가자가 입,퇴장할 때 채팅방에 접속인원을 알려준다.
-# 참여멤버
-class ReqJoinMember:
-    def __init__(self, members: list):
-        self.members = members
-
-# 채팅 송신 허가 응답
-# 발신 아이디, 메세지
-class PerChat:
-    def __init__(self, sender_id: str, msg: str):
-        self.sender_id = sender_id
-        self.msg = msg
-
-# 유저가 입력한 메세지가 아이디, 번호, 내용, 시간이 db에 저장된다.
-# 아이디, 번호, 내용, 시간
-class ReqSaveChat:
-    def __init__(self, id: str, msg: str, time: str):
-        self.id = id
-        self.msg = msg
-        self.time = time
-
-# 친구요청을 하면 요청자와 친구 아이디를 넘겨준다.
-# (요청자 아이디, 수락자 아이디), 허락여부
-class PlusFriend:
-    def __init__(self, id_tuple: tuple, result: bool):
-        self.id_tuple = id_tuple
-
-# 로그아웃을 하면 접속상태를 0으로 변경시킨다.
-class ReqLogout:
-    def __init__(self, id: str):
-        self.id = id
-
-# 사용자의 프로필과 상태메세지를 변경할 수 있다.
-# 유저아이디, 상태메세지
-class ReqStateChange:
-    def __init__(self, user_id: str, user_state: str):
-        self.user_id = user_id
-        self.user_state = user_state
-
-# 사용자의 채팅창 배경이미지를 변경할 수 있다.
-# 유저아이디, 프로필 사진 경로
-class ReqImgChange:
-    def __init__(self, user_id: str, user_profile_path: str):
-        self.user_id = user_id
-        self.user_profile_path = user_profile_path
-
-# 대화방을 나가면 대화방과 대화내용(메세지)이 삭제된다.
-# 유저 아이디, 대화방 아이디
-class DeleteChat:
-    def __init__(self, id: str, cr_id: str):
-        self.id = id
-        self.cr_id = cr_id
-
-# 친구 리스트가 우측에 출력된다.
-# 사용자 프로필, 친구 이름, 접속 상태
-class ShowFrdList:
-    def __init__(self, user_profile: str, friend_name: str, is_online: bool):
-        self.user_profile: user_profile
-        self.friend_name = friend_name
-        self.is_online = is_online
-
-# 나가기를 누른 CTB_CHATROOM 테이블에서 CR_ID에 맞는 행들만 삭제한다.
-# 내 아이디, 나간 채팅방 아이디
-class DeleteMyTable:
-    def __init__(self, my_id: str, cr_id: str):
-        self.my_id = my_id
-        self.cr_id = cr_id
-
-# 1. 해당 CR_ID의 TB_CONTENT, TB_READ_CNT 테이블을 삭제한다.
-# 2. TB_CHATROOM에서 CR_ID 삭제
-# 참여멤버가 0인 채팅방 아이디
-class DeleteTable:
-    def __init__(self, cr_id: str):
-        self.cr_id = cr_id
-
-
-
-
 # ==================== 로그인
 
 # 로그인 요청 : 아이디, 비밀번호
@@ -139,7 +38,6 @@ class LoginInfo:
 class ReqLoout:
     def __init__(self, id_: str):
         self.id_ = id_
-
 
 
 # ==================== 회원가입
@@ -190,9 +88,6 @@ class PerEmailNumber:
     def __init__(self, ismatch: bool):
         self.ismatch = ismatch
 
-
-
-
 # ==================== 친구 초대
 
 # 친구 초대 요청
@@ -200,21 +95,14 @@ class ReqSuggetsFriend:
     def __init__(self, user_id_: str, frd_id_: str, result=False):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
-        self.result = False
+        self.result = result
 
 # 친구 수락 허가 응답
 class PerAcceptFriend:
-    def __init__(self, user_id_: str, frd_id_: str):
+    def __init__(self, user_id_: str, frd_id_: str, result=False):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
-        self.result = False
-
-# 친구 수락 요청
-class ReqAcceptFriend:
-    def __init__(self, user_id_: str, frd_id_: str):
-        self.user_id_ = user_id_
-        self.frd_id_ = frd_id_
-        self.result = False
+        self.result = result
 
 # ==================== 채팅방 개설
 

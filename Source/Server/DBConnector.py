@@ -7,8 +7,7 @@ import pandas as pd
 
 from Source.Main.DataClass import *
 
-
-class DBConnector:  # DB를 총괄하는 클래스
+class DBConnector:      # DB를 총괄하는 클래스
     def __init__(self):
         self.conn = sqlite3.connect("data.db", check_same_thread=False)
 
@@ -81,8 +80,8 @@ class DBConnector:  # DB를 총괄하는 클래스
     def insert_user(self, user_id, user_name, user_email, user_pw,
                     user_create_date, user_img, user_state):
         self.conn.execute("insert into TB_USER (USER_ID, USER_NAME, USER_EMAIL, USER_PW, USER_CRATE_DATE, "
-                          "USER_IMG, USER_STATE) values (?, ?, ?, ?, ?, ?, ?)",
-                          (user_id, user_name, user_email, user_pw, user_create_date, user_img, user_state))
+                  "USER_IMG, USER_STATE) values (?, ?, ?, ?, ?, ?, ?)",
+                  (user_id, user_name, user_email, user_pw, user_create_date, user_img, user_state))
         self.commit_db()
 
     # 회원 정보 테이블 전체 조회
@@ -115,7 +114,7 @@ class DBConnector:  # DB를 총괄하는 클래스
         sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}' AND USER_PW = '{data.password}'"
         df = pd.read_sql(sql, self.conn)
         row = len(df)
-        print("row", row)
+        print("row",row)
 
         if row in [None, 0]:
             result.rescode = 0
@@ -177,26 +176,20 @@ class DBConnector:  # DB를 총괄하는 클래스
         self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
         self.commit_db()
 
-    # 친구 목록 가져오기
-    def get_all_friend(self, user_id):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}'", self.conn)
-        return df
-
-    # 수락/거절 조건에 따른 친구 조회
-    def get_accept_friend(self, user_id, accept=True):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}' and FRD_ACCEPT = {accept}", self.conn)
-        return df
+    # 친구 요청 결과 적용
+    def update_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
+        self.commit_db()
 
     # 친구 삭제
-    def delete_friend(self, user_id, frd_id: str):
-        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
+    def delete_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} FRD_ID = {data.frd_id_}")
         self.commit_db()
 
     ## TB_log ================================================================================ ##
     # LOG 정보 테이블 값 입력
     def insert_log(self, user_id, login_time, logout_time):
-        self.conn.execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)",
-                          (user_id, login_time, logout_time))
+        self.conn.execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)", (user_id, login_time, logout_time))
         self.commit_db()
 
     # LOG 테이블 전체 조회
@@ -213,7 +206,7 @@ class DBConnector:  # DB를 총괄하는 클래스
     ## TB_chatroom ================================================================================ ##
 
     # 채팅방 개설
-    def create_chatroom(self, data: JoinChat):
+    def create_chatroom(self, data:JoinChat):
         # 인원 확인
         if len(data.member) == 0:
             return False
@@ -263,26 +256,25 @@ class DBConnector:  # DB를 총괄하는 클래스
     # 방 맴버 정보 조회
     def find_user_chatroom(self, cr_id):
         df = pd.read_sql(f"select * from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
-        return df
+        return df["USER_ID"].values
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
-        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}",
-                         self.conn)
+        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}", self.conn)
         return df
 
     # 채팅방 나가기
     def delete_chatroom_member(self, cr_id: str, user_id):
-        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id, user_id))
+        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
         self.commit_db()
 
     ## TB_content ================================================================================ ##
     # 대화 추가
-    def insert_content(self, data: ReqChat):
+    def insert_content(self, data:ReqChat):
         print("insert_content")
         self.conn.execute(f"insert into TB_CONTENT_{data.cr_id_} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
-                          "values (?, ?, ?)",
-                          (data.user_id_, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                         "values (?, ?, ?)",
+                         (data.user_id_, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
         self.commit_db()
         print("save complete")
@@ -292,6 +284,7 @@ class DBConnector:  # DB를 총괄하는 클래스
         self.commit_db()
         return df
 
-
 if __name__ == "__main__":
+    # df = DBConnector().find_user_chatroom("PA_1")
+    # print()
     pass
