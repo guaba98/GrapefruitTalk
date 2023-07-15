@@ -64,6 +64,13 @@ class Server:
         elif type(data) in [PerLogin]:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode, data.id, data.pw)
+
+        # 소연 추가 부분
+        # elif type(data) in [PerChat]: # 채팅 송신 허가 응답
+        #     self.send_client(sock, data)
+        # elif type(data) in [Per]
+
+
         # elif type(data) in [ReqMembership]:
 
 
@@ -149,6 +156,14 @@ class Server:
             perdata: PerLogin = self.db.login(data)
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.id
+
+        # # 읽지않은 메세지 확인 - 이건 이따 트라이 트라이
+        # elif type(data) == ReqCntNum:
+        #     perdata: ReqCntNum = self.
+
+        # 개인 채팅방 목록 불러오기
+        elif type(data) == CallSchatList:
+            perdata: CallSchatList = self.db
 
         else:
             return data

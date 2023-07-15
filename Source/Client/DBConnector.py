@@ -134,9 +134,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 회원 정보 테이블 값 입력
     def insert_user(self, user_id, user_name, user_email, user_pw,
                     user_create_date, user_img, user_state):
-        self.conn.execute("insert into TB_USER (USER_ID, USER_NAME, USER_EMAIL, USER_PW, USER_CRATE_DATE, "
-                  "USER_IMG, USER_STATE) values (?, ?, ?, ?, ?, ?, ?)",
-                  (user_id, user_name, user_email, user_pw, user_create_date, user_img, user_state))
+        self.conn.execute("insert into TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CRATE_DATE, "
+                  "USER_IMG) values (?, ?, ?, ?, ?, ?)",
+                  (user_id, user_pw, user_name, user_email, user_create_date, user_img))
         self.commit_db()
 
     # 회원 정보 테이블 전체 조회
