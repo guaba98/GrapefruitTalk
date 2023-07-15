@@ -2,14 +2,18 @@ import socket
 import pickle
 
 from Source.Server.DBConnector import DBConnector
+from Source.Client.DBConnector import DBConnector as c_db
+
+
 from Source.Main.DataClass import *
 
 from threading import Thread
 
 
 class Server:
-    def __init__(self, port=1005, listener=10):
+    def __init__(self, port=1121, listener=10):
         self.db = DBConnector()
+        self.c_db = c_db()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
         # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
@@ -151,6 +155,19 @@ class Server:
             perdata: PerLogin = self.db.login(data)
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.id
+
+        # 읽지않은 메세지 - 이따가 츄라이 츄라이
+        elif type(data) == ReqCntNum:
+            perdata: ReqCntNum = self.c_db.
+
+        # # 개인 채팅방 목록 불러오기 -> 클라이언트에서 해야되는 부분인듯
+        # elif type(data) == CallSchatList:
+        #     perdata: CallSchatList = self.db_c.
+        #
+        # # 단체 채팅 목록 불러오기
+        # elif type(data) == CallGchatList:
+        #     pass
+
 
         else:
             return data
