@@ -13,7 +13,7 @@ class Server:
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
         # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
-        self.client : dict[tuple, list[socket.socket, str]] = {}
+        self.client: dict[tuple, list[socket.socket, str]] = {}
 
         # 서버 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,12 +46,11 @@ class Server:
     def disconnect(self, addr):
         # 접속 종료한 클라이언트의 정보가 존재한다면
         if addr in self.client:
-
             # 클라이언트 정보 삭제
             del self.client[addr]
 
     # 데이터 전송
-    def send(self, sock:socket.socket, data):
+    def send(self, sock: socket.socket, data):
         print(sock)
         # 데이터 타입에따른 데이터 전송
         if type(data) in [ReqChat]:
@@ -84,7 +83,7 @@ class Server:
             return False
 
     # 발송자를 제외한 나머지 접속자에게 메시지 발송
-    def send_message(self, data:ReqChat):
+    def send_message(self, data: ReqChat):
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
             # 연결된 모든 클라이언트에 데이터 발송
@@ -100,7 +99,7 @@ class Server:
             return False
 
     # 데이터 수신
-    def recevie(self, sock:socket.socket):
+    def recevie(self, sock: socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         addr = sock.getpeername()
 
@@ -151,6 +150,9 @@ class Server:
             perdata: PerLogin = self.db.login(data)
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.id
+        # elif type(data) ==
+
+
 
         else:
             return data
@@ -176,7 +178,7 @@ class Server:
         if not All_TB_LOG:
             print("예외처리 : TB_LOG에 아무것도 없습니다.")
 
-    def handler(self, sock,):
+    def handler(self, sock, ):
         while True:
             data = self.recevie(sock)
 
@@ -191,6 +193,7 @@ class Server:
             print("[ 데이터 처리 ]")
             self.send(sock, process_data)
             print("처리 완료")
+
 
 if __name__ == "__main__":
     server = Server()
