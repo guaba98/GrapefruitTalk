@@ -7,14 +7,13 @@ from Source.Main.DataClass import *
 
 from threading import Thread
 
-
 class Server:
     def __init__(self, port=1989, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
         # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
-        self.client: dict[tuple, list[socket.socket, str]] = {}
+        self.client : dict[tuple, list[socket.socket, str]] = {}
 
         # 서버 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,7 +56,7 @@ class Server:
             del self.client[addr]
 
     # 데이터 타입에따른 데이터 전송
-    def send(self, sock: socket.socket, data):
+    def send(self, sock:socket.socket, data):
         # 접속중인 방 멤버에게만 메시지 발송
         if type(data) in [ReqChat]:
             self.send_message(data)
@@ -86,7 +85,7 @@ class Server:
                 self.send_exclude_sender(sock, LoginInfo(data.user_id_))
         # elif type(data) in [ReqMembership]:
 
-    def send_friend(self, sock: socket.socket, data: PerAcceptFriend):
+    def send_friend(self, sock:socket.socket, data:PerAcceptFriend):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
 
@@ -152,7 +151,7 @@ class Server:
             return False
 
     # 데이터 수신
-    def recevie(self, sock: socket.socket):
+    def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         try:
             receive_bytes = sock.recv(4096)
@@ -223,7 +222,7 @@ class Server:
 
                 # 요청 받은 친구가 접속중인 경우
                 if data.frd_id_ in login_list:
-                    perdata: PerAcceptFriend(data.user_id_, data.frd_id_)
+                    perdata:PerAcceptFriend(data.user_id_, data.frd_id_)
 
             # 친구 요청 결과 발송
             elif req_user_id == data.frd_id_:
@@ -232,14 +231,14 @@ class Server:
                     self.db.update_friend(data)
 
                     if data.user_id_ in login_list:
-                        perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 1)
 
                 # 거절
                 else:
                     self.db.delete_friend(data)
 
                     if data.user_id_ in login_list:
-                        perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 0)
+                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         else:
             return data
