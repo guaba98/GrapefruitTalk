@@ -532,6 +532,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
             # print(self.user_info)
+            # 여기서 호출
+            self.create_client_table(self.user_id)
 
             self.login_list = data.login_info.copy()
             print("접속중 유저 :", self.login_list)
@@ -539,6 +541,37 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.set_page_talk()
             return True
 
+    # 처음에는 테이블 생성(서버에 있는 정보가 기본으로 클라이언트 DB로 전달된다.)
+    def create_client_table(self, user_id):
+        """유저 아이디와 맞는 정보를 서버 db에서 가져와서 정보를 복사해 넣는다."""
+        # 서버 데이터베이스 연결
+        server_conn = sqlite3.connect('../Server/data.db')
+
+        # (조건 설정) 클라이언트 테이블: sql문
+
+        condition = {
+            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER' WHERE USER_ID = '{user_id}'",
+            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{user_id}'",
+            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{user_id}' GROUP BY TB_CHATROOM.CR_ID",
+            # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
+            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{user_id}')"
+            ,
+
+        }
+
+        # 클라이언트 테이블 생성(있으면 삭제 후 추가)
+        client_conn = sqlite3.connect('../Client/data.db')
+        client_cursor = client_conn.cursor()
+        for c_table, query in condition.items():
+            client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
+            server_data = pd.read_sql_query(query, server_conn)
+            server_data.to_sql(c_table, client_conn, index=False)
+
+        # 변경사항 저장
+        client_conn.commit()
+
+        # 연결 종료
+        client_conn.close()
     # ================================================== 대화 화면 ==================================================
 
     # 채팅 화면 최초 출력
