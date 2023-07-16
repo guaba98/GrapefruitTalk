@@ -84,7 +84,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         result: PerRegist = PerRegist(True)
         try:
             sql = f"INSERT INTO CTB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
-                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
+                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',1, 0)"
             self.conn.execute(sql)
 
             self.conn.execute(f"insert into CTB_USER_CHATROOM values ('PA_1', '{data.id_}');")
@@ -107,14 +107,9 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    # def insert_friend(self, data):
-    #     self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
-    #     self.commit_db()
-
-    def insert_friend(self, data:PlusFriend):
-        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
-        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
-                          "values (?, ?, ?)", (get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1]))
+    def insert_friend(self, data):
+        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+        self.commit_db()
 
     # 친구 요청 결과 적용
     def update_friend(self, data):
@@ -174,7 +169,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
-        self.conn.execute(f""" CREATE TABLE CTB_CONTENT_{_cr_id} (
+        self.conn.execute(f""" CREATE TABLE IF NOT EXISTS CTB_CONTENT_{_cr_id} (
                     "USER_ID" TEXT,
                     "CNT_ID" INTEGER,
                     "CNT_CONTENT" TEXT,
@@ -183,7 +178,8 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        self.create_tb_read_cnt(_cr_id)
+        print(_cr_id)
+        self.create_tb_read_cnt(JoinChat("", list(), list(), "", cr_id_=_cr_id))
 
         return _cr_id
 
@@ -264,10 +260,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
         try:
-            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchone()[0]
+            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id} where USER_ID = '{user_id}'").fetchone()[0]
         except:
             self.create_tb_read_cnt(JoinChat(user_id, [user_id], list(), "", cr_id_=cr_id))
-            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchone()[0]
+            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id} where USER_ID = '{user_id}'").fetchone()[0]
 
 
         last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1").fetchone()[0]
@@ -308,18 +304,25 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     def get_friend_list(self):
         # 친구 목록
-        sql1 = f"""select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
-                    left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID 
-                    WHERE ( CTB_FRIEND.FRD_ID = '{self.user_id}' or CTB_FRIEND.USER_ID = '{self.user_id}') and CTB_FRIEND.FRD_ACCEPT=1;"""
+        sql1 = f"""select CTB_FRIEND.USER_ID as F_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
+                            left join CTB_USER on CTB_FRIEND.USER_ID = CTB_USER.USER_ID 
+                            WHERE CTB_FRIEND.FRD_ID = '{self.user_id}' and CTB_FRIEND.FRD_ACCEPT=1;"""
+
+        sql2 = f"""select CTB_FRIEND.FRD_ID as F_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
+                            left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID 
+                            WHERE CTB_FRIEND.USER_ID = '{self.user_id}' and CTB_FRIEND.FRD_ACCEPT=1;"""
 
         # 친구 수락 대기
-        sql2 = f"""select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
-                    left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.FRD_ID = '{self.user_id}' and CTB_FRIEND.FRD_ACCEPT=0;"""
+        sql3 = f"""select CTB_FRIEND.USER_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
+                    left join CTB_USER on CTB_FRIEND.USER_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.FRD_ID = '{self.user_id}' and CTB_FRIEND.FRD_ACCEPT=0;"""
 
         df1 = pd.read_sql(sql1, self.conn)
         df2 = pd.read_sql(sql2, self.conn)
+        df3 = pd.read_sql(sql3, self.conn)
+        result = df1._append(df2)
+        print(result)
 
-        return df1, df2
+        return result, df3
 
     def get_last_content(self, cr_id):
         df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)

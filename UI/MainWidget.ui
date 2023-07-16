@@ -182,6 +182,9 @@ padding:5px;</string>
            <property name="text">
             <string/>
            </property>
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
            <property name="placeholderText">
             <string>비밀번호</string>
            </property>
@@ -490,6 +493,9 @@ border-radius:5px;
 border-radius:5px;
 padding:5px;</string>
                 </property>
+                <property name="echoMode">
+                 <enum>QLineEdit::Password</enum>
+                </property>
                 <property name="placeholderText">
                  <string>비밀번호 (영대문자,특수문자 필수,5~16자)</string>
                 </property>
@@ -543,6 +549,9 @@ padding:5px;</string>
                  <string notr="true">border:1px solid lightgray;
 border-radius:5px;
 padding:5px;</string>
+                </property>
+                <property name="echoMode">
+                 <enum>QLineEdit::Password</enum>
                 </property>
                 <property name="placeholderText">
                  <string>비밀번호 확인</string>
@@ -1104,7 +1113,7 @@ QScrollBar::sub-line:vertical {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>532</width>
+                <width>486</width>
                 <height>738</height>
                </rect>
               </property>
@@ -1171,37 +1180,6 @@ QScrollBar::sub-line:vertical {
                 <string notr="true">border:1px solid lightgray;
 border-radius:5px;
 padding:5px;</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_emoticon">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border: 1px solid lightgray;
-border-radius: 5px;
-padding: 3px;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>../Images/btn_emoticon.png</normaloff>../Images/btn_emoticon.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>22</width>
-                 <height>22</height>
-                </size>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -1392,7 +1370,6 @@ padding: 3px;</string>
   <tabstop>btn_friend</tabstop>
   <tabstop>scroll_talk</tabstop>
   <tabstop>edt_txt</tabstop>
-  <tabstop>btn_emoticon</tabstop>
   <tabstop>btn_send</tabstop>
   <tabstop>btn_out</tabstop>
   <tabstop>btn_add</tabstop>

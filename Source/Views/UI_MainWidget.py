@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './UI/MainWidget.ui'
+# Form implementation generated from reading ui file 'MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -76,6 +77,7 @@ class Ui_MainWidget(object):
 "border-radius:5px;\n"
 "padding:5px;")
         self.edt_login_pwd.setText("")
+        self.edt_login_pwd.setEchoMode(QtWidgets.QLineEdit.Password)
         self.edt_login_pwd.setObjectName("edt_login_pwd")
         self.verticalLayout_3.addWidget(self.edt_login_pwd)
         self.btn_login = QtWidgets.QPushButton(self.page_login)
@@ -198,6 +200,7 @@ class Ui_MainWidget(object):
         self.edt_join_pwd1.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
 "padding:5px;")
+        self.edt_join_pwd1.setEchoMode(QtWidgets.QLineEdit.Password)
         self.edt_join_pwd1.setObjectName("edt_join_pwd1")
         self.gridLayout.addWidget(self.edt_join_pwd1, 1, 0, 1, 3)
         self.edt_join_id = QtWidgets.QLineEdit(self.frame)
@@ -219,6 +222,7 @@ class Ui_MainWidget(object):
         self.edt_join_pwd2.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
 "padding:5px;")
+        self.edt_join_pwd2.setEchoMode(QtWidgets.QLineEdit.Password)
         self.edt_join_pwd2.setObjectName("edt_join_pwd2")
         self.gridLayout.addWidget(self.edt_join_pwd2, 2, 0, 1, 3)
         self.widget_email = QtWidgets.QWidget(self.frame)
@@ -486,7 +490,7 @@ class Ui_MainWidget(object):
         self.scroll_talk.setWidgetResizable(True)
         self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 532, 738))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 486, 738))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -515,28 +519,15 @@ class Ui_MainWidget(object):
 "padding:5px;")
         self.edt_txt.setObjectName("edt_txt")
         self.layout_input.addWidget(self.edt_txt)
-        self.btn_emoticon = QtWidgets.QPushButton(self.frame_room)
-        self.btn_emoticon.setMinimumSize(QtCore.QSize(0, 30))
-        self.btn_emoticon.setStyleSheet("border: 1px solid lightgray;\n"
-"border-radius: 5px;\n"
-"padding: 3px;")
-        self.btn_emoticon.setText("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("../../Images/btn_emoticon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_emoticon.setIcon(icon4)
-        self.btn_emoticon.setIconSize(QtCore.QSize(22, 22))
-        self.btn_emoticon.setFlat(True)
-        self.btn_emoticon.setObjectName("btn_emoticon")
-        self.layout_input.addWidget(self.btn_emoticon)
         self.btn_send = QtWidgets.QPushButton(self.frame_room)
         self.btn_send.setMinimumSize(QtCore.QSize(0, 30))
         self.btn_send.setStyleSheet("border: 1px solid lightgray;\n"
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_send.setText("")
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("../../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_send.setIcon(icon5)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("../../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_send.setIcon(icon4)
         self.btn_send.setIconSize(QtCore.QSize(22, 22))
         self.btn_send.setFlat(True)
         self.btn_send.setObjectName("btn_send")
@@ -560,9 +551,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_out.setText("")
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap("../../Images/btn_out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_out.setIcon(icon6)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("../../Images/btn_out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_out.setIcon(icon5)
         self.btn_out.setIconSize(QtCore.QSize(22, 22))
         self.btn_out.setObjectName("btn_out")
         self.horizontalLayout_7.addWidget(self.btn_out)
@@ -585,9 +576,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_setting.setText("")
-        icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap("../../Images/btn_setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_setting.setIcon(icon7)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap("../../Images/btn_setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_setting.setIcon(icon6)
         self.btn_setting.setIconSize(QtCore.QSize(22, 22))
         self.btn_setting.setObjectName("btn_setting")
         self.horizontalLayout_7.addWidget(self.btn_setting)
@@ -620,8 +611,7 @@ class Ui_MainWidget(object):
         MainWidget.setTabOrder(self.btn_member, self.btn_friend)
         MainWidget.setTabOrder(self.btn_friend, self.scroll_talk)
         MainWidget.setTabOrder(self.scroll_talk, self.edt_txt)
-        MainWidget.setTabOrder(self.edt_txt, self.btn_emoticon)
-        MainWidget.setTabOrder(self.btn_emoticon, self.btn_send)
+        MainWidget.setTabOrder(self.edt_txt, self.btn_send)
         MainWidget.setTabOrder(self.btn_send, self.btn_out)
         MainWidget.setTabOrder(self.btn_out, self.btn_add)
         MainWidget.setTabOrder(self.btn_add, self.btn_setting)
@@ -650,3 +640,13 @@ class Ui_MainWidget(object):
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())

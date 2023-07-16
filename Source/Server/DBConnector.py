@@ -112,6 +112,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         """클라이언트 로그인 요청 -> 서버 로그인 허가 """
         result: PerLogin = PerLogin(rescode=2, user_id_=data.id_)
         sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}' AND USER_PW = '{data.password}'"
+        print(sql)
         df = pd.read_sql(sql, self.conn)
         row = len(df)
         print("row",row)
@@ -157,11 +158,11 @@ class DBConnector:      # DB를 총괄하는 클래스
         result: PerRegist = PerRegist(True)
         try:
             sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
-                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
+                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',1, 0)"
             self.conn.execute(sql)
 
             self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id_}');")
-
+            self.insert_content(ReqChat("PA_1", "", f"'{data.nm}'님이 입장했습니다."))
             self.conn.commit()
         except:
             self.conn.rollback()
@@ -171,35 +172,30 @@ class DBConnector:      # DB를 총괄하는 클래스
         return result
 
     def change_user_state(self, data:ReqStateChange):
-        if 'Images' in data.user_state:
-            sql = f"UPDATE TB_USER SET USER_IMG = {data.user_state} WHERE USER_ID = '{data.user_id}'"
-            self.conn.execute(sql)
-        if '상태' in data.user_state:
-            sql = f"UPDATE TB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
-            self.conn.execute(sql)
+        sql = f"UPDATE TB_USER SET USER_IMG = {data.user_img} WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
+        sql = f"UPDATE TB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
 
         self.conn.commit()
+        return data
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    # def insert_friend(self, data: ReqSuggetsFriend):
-    #     self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
-    #     self.commit_db()
-
-    def insert_friend(self, data:PlusFriend):
-        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
-        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)",
-                          (get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1]))
-
+    def insert_friend(self, data: ReqSuggetsFriend):
+        print(get_data_tuple(data))
+        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", (data.user_id_, data.frd_id_, data.result))
+        self.commit_db()
 
     # 친구 요청 결과 적용
     def update_friend(self, data: ReqSuggetsFriend):
+        print(get_data_tuple(data))
         self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
         self.commit_db()
 
     # 친구 삭제
     def delete_friend(self, data: ReqSuggetsFriend):
-        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} FRD_ID = {data.frd_id_}")
+        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} and FRD_ID = {data.frd_id_}")
         self.commit_db()
 
     ## TB_log ================================================================================ ##
