@@ -57,8 +57,8 @@ class Server:
 
     # 데이터 타입에따른 데이터 전송
     def send(self, sock:socket.socket, data):
-        # 접속중인 방 멤버에게만 메시지 발송
-        if type(data) in [ReqChat]:
+        # 같은 채팅방 멤버에게 발송
+        if type(data) in [ReqChat, JoinChat, ReqJoinMember, DeleteTable]:
             self.send_message(data)
 
         # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
@@ -69,14 +69,19 @@ class Server:
         elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist]:
             self.send_client(sock, data)
 
+        # 친구에게 발송
         elif type(data) in [PerAcceptFriend]:
             self.send_friend(sock, data)
+
+        elif type(data) in [ReqStateChange]:
+            self.send_all_client(data)
 
         # 클라이언트 로그인 요청 → 두 방식으로 발송해야해서 따로 나눔
         elif type(data) in [PerLogin]:
             # 요청자에게 로그인 결과 발송
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode)
+
 
             # 로그인 성공시
             # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
@@ -85,6 +90,7 @@ class Server:
                 self.send_exclude_sender(sock, LoginInfo(data.user_id_))
         # elif type(data) in [ReqMembership]:
 
+    # 친구에게 발송
     def send_friend(self, sock:socket.socket, data:PerAcceptFriend):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
@@ -119,10 +125,14 @@ class Server:
         else:
             return False
 
-    # 발송자를 제외한 나머지 접속자에게 메시지 발송
-    def send_message(self, data: ReqChat):
+    # 같은 채팅방 멤버에게 발송
+    def send_message(self, data):
         if self.connected():
-            member = self.db.find_user_chatroom(data.cr_id_)
+            if type(data) == ReqChat:
+                member = self.db.find_user_chatroom(data.cr_id_)
+            elif type(data) == JoinChat:
+                member = data.member
+
             print("sende message")
             print("member :", member)
 
@@ -154,7 +164,8 @@ class Server:
     def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         try:
-            receive_bytes = sock.recv(4096)
+            # receive_bytes = sock.recv(4096)
+            receive_bytes = sock.recv(2048)
 
             # 데이터 수신 실패시 오류 발생
             if not receive_bytes:
@@ -194,6 +205,7 @@ class Server:
         # 회원가입 요청
         elif type(data) == ReqMembership:
             perdata: PerRegist = self.db.regist(data)
+            self.db.insert_content(ReqChat("PA_1", "", f"'{data.user_id_}'님이 입장했습니다."))
 
         # 로그인 요청
         elif type(data) == ReqLogin:
@@ -208,7 +220,15 @@ class Server:
             self.client[sock.getpeername()][1] = ""
             perdata: LoginInfo([user_id], False)
 
-        # 중간 과정 없이 바로 진행 하는 data
+        # 유저 프로필 사진, 상태메세지 변경
+        elif type(data) == ReqStateChange:
+            perdata: ReqStateChange = self.db.change_user_state(data)
+
+        elif type(data) == JoinChat:
+            self.db.create_chatroom(data)
+            self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
+            perdata = data
+
         # 친구 요청, 친구 수락/거절
         elif type(data) == ReqSuggetsFriend:
             # 요청 유저 아이디
@@ -240,9 +260,15 @@ class Server:
                     if data.user_id_ in login_list:
                         perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
+        # 유저 나가기 요청
+        elif type(data) == DeleteTable:
+            self.db.delete_table(data)
+            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 입장했습니다."))
+            perdata = data
         else:
             return data
 
+        print("after")
         print(f"process_data : {type(perdata)}")
         print("perdata", get_data_tuple(data))
         print()
@@ -261,7 +287,6 @@ class Server:
 
     def db_log_inout_state_save(self, rescode):
         """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
-        sql_ = ''
         time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         print(time_)
         print(rescode)

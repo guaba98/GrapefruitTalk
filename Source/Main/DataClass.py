@@ -6,12 +6,6 @@ import pandas
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트
 
-# 읽지않은 메세지 출력 요청
-class ReqCntNum:
-    def __init__(self, cr_id:str, user_id: list): #채팅방 참여 멤버의 아이디는 list에 담김
-        self.cr_id = cr_id
-        self.user_id = user_id
-
 # 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 개인 채팅방 목록을 불러온다.
 # 채팅방 번호(타입), 채팅방 멤버
 class CallSchatList:
@@ -26,10 +20,11 @@ class CallGchatList:
         self.chat_room = chat_room_id
         self.chat_room_members = chat_room_members
 
-# 참가자가 입,퇴장할 때 채팅방에 접속인원을 알려준다.
+# 참가자가 입장할 때 채팅방에 접속인원을 알려준다.
 # 참여멤버
 class ReqJoinMember:
-    def __init__(self, members: list):
+    def __init__(self, my_id: str, members: list):
+        self.my_id = my_id
         self.members = members
 
 # 채팅 송신 허가 응답
@@ -62,16 +57,17 @@ class ReqLogout:
 # 사용자의 프로필과 상태메세지를 변경할 수 있다.
 # 유저아이디, 상태메세지
 class ReqStateChange:
-    def __init__(self, user_id: str, user_state: str):
+    def __init__(self, user_id: str, user_state: str, user_img:str):
         self.user_id = user_id
         self.user_state = user_state
+        self.user_img = user_img
 
 # 사용자의 채팅창 배경이미지를 변경할 수 있다.
-# 유저아이디, 프로필 사진 경로
-class ReqImgChange:
-    def __init__(self, user_id: str, user_profile_path: str):
-        self.user_id = user_id
-        self.user_profile_path = user_profile_path
+# 유저아이디, 채팅창 배경이미지 경로
+# class ReqImgChange:
+#     def __init__(self, user_id: str, user_chatimg_path: str):
+#         self.user_id = user_id
+#         self.user_chatimg_path = user_chatimg_path
 
 # 친구 리스트가 우측에 출력된다.
 # 사용자 프로필, 친구 이름, 접속 상태
@@ -92,8 +88,10 @@ class DeleteMyTable:
 # 2. TB_CHATROOM에서 CR_ID 삭제
 # 참여멤버가 0인 채팅방 아이디
 class DeleteTable:
-    def __init__(self, cr_id: str):
+    def __init__(self, cr_id: str, my_id: str, my_name:str):
         self.cr_id = cr_id
+        self.my_id = my_id
+        self.my_name = my_name
 
 # ==================== 로그인
 
@@ -197,10 +195,12 @@ class PerAcceptFriend:
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id_: str, member: list, title:str):
+    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, cr_id_=""):
         self.user_id_ = user_id_
-        self.member = member
+        self.member_id = member_id
+        self.member_name = member_name
         self.title = title
+        self.cr_id_ = cr_id_
 
 # 채팅방 나가기
 class OutChat:
