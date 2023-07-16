@@ -227,6 +227,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.join_chat.connect(self.join_chat_room)
         self.receive_thread.res_delete_table.connect(self.delete_talbe)
 
+        # 정보 변경
+        self.receive_thread.res_change_state.connect(self.change_state)
+
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -684,9 +687,9 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             QtTest.QTest.qWait(50)
             self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
+            self.edt_txt.setText('')
         else:
             self.edt_txt.setStyleSheet("""color: rgb(255, 0, 4);""")
-            self.edt_txt.setText('')
             self.dlg_warning.set_dialog_type(1, 'use_ban_word')
             self.dlg_warning.exec()
 
@@ -1136,11 +1139,16 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.dlg_setting.set_profile_page(self.user_info["USER_NM"], self.user_info["USER_IMG"], self.user_info["USER_STATE"])
 
         if self.dlg_setting.exec():
-            """프로필 편집 완료 버튼 클릭 시"""
-            print(self.dlg_setting.return_profile_data())   # --- 사용자 프로필 DB 변경 추가 해야 함
+            data = self.dlg_setting.return_profile_data()
+            state = ReqStateChange(self.user_id, data[2], data[1])
+            self.db.change_user_state(state)
+            self.client.send(state)
 
         if not self.dlg_setting.notice_setting:
             self.badge_single.setVisible(False)
             self.badge_multi.setVisible(False)
+
+    def change_state(self, data):
+        self.db.change_user_state(data)
 
 # ==============================================================================================================
