@@ -221,11 +221,11 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
         # 인원 확인
-        if len(data.member) == 0:
+        if len(data.member_id) == 0:
             return False
 
         # 타입 확인 - OE_ 1:1, OA_ 1:N
-        elif len(data.member) == 1:
+        elif len(data.member_id) == 1:
             _type = "OE_"
         else:
             _type = "OA_"
@@ -249,7 +249,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         # 방장 추가
         self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
-        for member in data.member:
+        for member in data.member_id:
             self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
@@ -262,31 +262,41 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        return df
+        return _cr_id
 
     def delete_table(self, data:DeleteTable):
         """PK,FK를 고려하여 순서작성함"""
 
-        if len(data.user_id_list) > 1:
-            # 나간 유저를 제외한 접속 멤버로 값 update
-            df = pd.read_sql(f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'", self.conn)
-            user_id_list = df['USER_ID'].tolist()
-            user_id_list.pop(f'{data.my_id}')
+        # 나간 유저를 제외한 접속 멤버로 값 update
+        df = pd.read_sql(f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'", self.conn)
+        user_id_list = df['USER_ID'].tolist()
+        user_id_list.remove(data.my_id)
 
-            self.conn.execute(f"UPDATE TB_USER_CHATROOM SET USER_ID = {user_id_list} WHERE CR_ID = {data.cr_id}")
-            self.conn.commit()
+        print(user_id_list)
 
-        elif len(data.user_id_list) <= 1:
+        # 단톡방에 남은 사람이 1명 초과 경우 명단에서 유저만 제외
+        if len(user_id_list) > 1:
             # TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
-            sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = {data.cr_id}"
-            # TB_CHATROOM 의 CR_ID 삭제
-            sql_2 = f"DELETE FROM TB_CHATROOM WHERE CR_ID = {data.cr_id}"
-            # TB_READ_CNT_{CR_ID} 테이블 삭제
-            sql_3 = f"DROP TABLE TB_READ_CNT_{data.cr_id}"
-            # TB_CONTENT_{CR_ID} 테이블 삭제
-            sql_4 = f"DROP TABLE TB_CONTENT_{data.cr_id}"
+            sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}' and USER_ID = '{data.my_id}'"
 
-            process_sql = [sql_1, sql_2, sql_3, sql_4]
+            try:
+                self.conn.execute(sql_1)
+                self.commit_db()
+            except Exception as e:
+                self.conn.rollback()
+                # 오류 처리 또는 로깅
+                print(f"delete_table에서 Error occurred: {e}")
+
+        # 단톡방에 남은 사람이 1명 이하 경우 방 파기
+        elif len(user_id_list) <= 1:
+            sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'"
+            # TB_CHATROOM 의 CR_ID 삭제
+            sql_2 = f"DELETE FROM TB_CHATROOM WHERE CR_ID = '{data.cr_id}'"
+
+            # TB_CONTENT_{CR_ID} 테이블 삭제
+            sql_3 = f"DROP TABLE TB_CONTENT_{data.cr_id}"
+
+            process_sql = [sql_1, sql_2, sql_3]
             try:
                 for sql in process_sql:
                     self.conn.execute(sql)
@@ -295,8 +305,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 self.conn.rollback()
                 # 오류 처리 또는 로깅
                 print(f"delete_table에서 Error occurred: {e}")
-            finally:
-                self.end_conn()
 
 
     ## TB_user_chatroom ================================================================================ ##
@@ -331,6 +339,30 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select * from TB_CONTENT_{cr_id}", self.conn)
         self.commit_db()
         return df
+
+    def get_user_db(self, user_id):
+        # (조건 설정) 클라이언트 테이블: sql문
+        db = {
+            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
+            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{user_id}' OR FRD_ID ='{user_id}'",
+            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{user_id}' GROUP BY TB_CHATROOM.CR_ID",
+            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{user_id}')"
+        }
+        print(3)
+        for c_table, query in db.items():
+            server_data = pd.read_sql_query(query, self.conn)
+            db[c_table] = server_data
+
+        condition = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID = '{user_id}'"
+        table_dict = pd.read_sql_query(condition, self.conn).values.tolist()
+        table_dict = table_dict
+        # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
+        for idx in table_dict:
+            server_data = pd.read_sql_query(f"SELECT * FROM TB_CONTENT_{idx[0]}", self.conn)  # 테이블 내용 불러오기
+            db["CTB_CONTENT_"+idx[0]] = server_data
+        print(4)
+        print(db)
+        return db
 
 if __name__ == "__main__":
     # df = DBConnector().find_user_chatroom("PA_1")

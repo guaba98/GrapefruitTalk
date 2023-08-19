@@ -111,6 +111,7 @@ class PerLogin:
         self.user_id_ = user_id_
         self.login_info = login_info
         self.user_info = user_info
+        self.user_db = {}
 
 # 로그인 유저 정보 발송
 # len(list)=1: 신규로 로그인/로그아웃 발행할때 발송용
@@ -196,8 +197,9 @@ class PerAcceptFriend:
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, cr_id_=""):
+    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, user_name_="", cr_id_=""):
         self.user_id_ = user_id_
+        self.user_name_ = user_name_
         self.member_id = member_id
         self.member_name = member_name
         self.title = title

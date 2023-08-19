@@ -8,7 +8,7 @@ from Source.Main.DataClass import *
 from threading import Thread
 
 class Server:
-    def __init__(self, port=1234, listener=10):
+    def __init__(self, port=8000, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -59,12 +59,16 @@ class Server:
     def send(self, sock:socket.socket, data):
         print("send!")
 
+        if type(data) == JoinChat:
+            self.send_message(data)
+            self.send_client(sock, data)
+
         # 같은 채팅방 멤버에게 발송
-        if type(data) in [ReqChat, JoinChat, ReqJoinMember, DeleteTable]:
+        elif type(data) in [ReqChat, ReqJoinMember, DeleteTable]:
             self.send_message(data)
 
         # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
-        if type(data) in [LoginInfo]:
+        elif type(data) in [LoginInfo]:
             self.send_exclude_sender(sock, data)
 
         # 요청한 클라이언트에게 회신
@@ -84,7 +88,6 @@ class Server:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode)
 
-
             # 로그인 성공시
             # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
             if data.rescode == 2:
@@ -96,8 +99,6 @@ class Server:
     def send_friend(self, sock:socket.socket, data):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
-            print(f"user_id : {user_id}")
-            print(f"data : {data.user_id_} , {data.frd_id_}")
 
             # 친구 요청
             if user_id == data.user_id_:
@@ -107,9 +108,7 @@ class Server:
             else:
                 send_id = data.user_id_
 
-            print(send_id)
             for client in self.client.values():
-                print(f"--- {client[1]}, {send_id}")
                 if client[1] == send_id:
                     client[0].sendall(pickle.dumps(data))
                     break
@@ -136,20 +135,17 @@ class Server:
         if self.connected():
             if type(data) == ReqChat:
                 member = self.db.find_user_chatroom(data.cr_id_)
-            elif type(data) == JoinChat:
-                member = data.member
 
-            print("sende message")
-            print("member :", member)
+            elif type(data) == JoinChat:
+                member = data.member_id
 
             for idx, client in enumerate(self.client.values()):
-                print("-", client[1])
                 if data.user_id_ != client[1] and client[1] in member:
                     client[0].sendall(pickle.dumps(data))
                     # self.db.insert_content(data)
 
                 # 메시지 발송내역은 한번만 저장
-                if idx == 0:
+                if idx == 0 and type(data) == ReqChat:
                     self.db.insert_content(data)
             return True
         else:
@@ -157,7 +153,6 @@ class Server:
 
     # 발송자를 제외한 나머지 접속자에게 발송
     def send_exclude_sender(self, sock: socket.socket, data: LoginInfo):
-        print("send_exclude_sender")
         if self.connected():
             for idx, client in enumerate(self.client.values()):
                 if self.client[sock.getpeername()][1] != client[1]:
@@ -170,7 +165,7 @@ class Server:
     def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         try:
-            receive_bytes = sock.recv(2048)
+            receive_bytes = sock.recv(50000)
 
             # 데이터 수신 실패시 오류 발생
             if not receive_bytes:
@@ -218,6 +213,9 @@ class Server:
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.user_id_
                 perdata.login_info = self.get_login_list()
+                print(1)
+                perdata.user_db = self.db.get_user_db(perdata.user_id_)
+                print(2)
 
         # 로그 아웃
         elif type(data) == ReqLoout:
@@ -230,29 +228,32 @@ class Server:
             perdata: ReqStateChange = self.db.change_user_state(data)
 
         elif type(data) == JoinChat:
-            self.db.create_chatroom(data)
-            self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
+            cr_id = self.db.create_chatroom(data)
+            chat = ReqChat(cr_id, "", ", ".join(data.member_name) + "님이 입장했습니다.")
+            self.db.insert_content(chat)
             perdata = data
+            perdata.cr_id_ = cr_id
+
 
         # 친구 요청 보내기
         elif type(data) == ReqSuggetsFriend:
             self.db.insert_friend(data)
-            perdata: ReqSuggetsFriend(data.user_id_, data.frd_id_)
+            perdata:ReqSuggetsFriend = ReqSuggetsFriend(data.user_id_, data.frd_id_)
 
         # 친구 응답 보내기
         elif type(data) == PerAcceptFriend:
             if data.result == 1:
                 self.db.update_friend(data)
-                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+                perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
             # 거절
             else:
                 self.db.delete_friend(data)
-                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 0)
+                perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         # 유저 나가기 요청
         elif type(data) == DeleteTable:
             self.db.delete_table(data)
-            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 입장했습니다."))
+            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 퇴장했습니다."))
             perdata = data
         else:
             return data

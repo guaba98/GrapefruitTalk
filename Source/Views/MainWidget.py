@@ -60,8 +60,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.use_id_check = False
 
         # 인증메일 송신자
-        self.s_email = 'rhrnaka@gmail.com'
-        self.s_pwd = 'sxrrxnbbfstqniee'
+        self.s_email = 'sjin030@gmail.com'
+        self.s_pwd = 'opocpruqcmfcvczh'
 
         # 이벤트 연결
         self.connect_event()
@@ -513,10 +513,12 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         else:
             self.user_id = id_
+            self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
             self.client.send(ReqMembership(id_, pwd, nm, email, c_date, img))
 
     def join_input_check(self, data: PerRegist):
         """회원가입 정보 입력 , 서버 허가 요청 송신"""
+        print("회원가입 완료")
         if data.Success:
             self.dlg_warning.set_dialog_type(2, "success_join_membership")
             if self.dlg_warning.exec():
@@ -550,60 +552,14 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
+            self.db.save_user_db(data.user_db)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-            self.create_client_table()
-            # print(self.user_info)
 
             self.login_list = data.login_info.copy()
             print("접속중 유저 :", self.login_list)
 
             self.set_page_talk()
             return True
-
-    def create_client_table(self):
-        print("유저 아이디 : ", self.user_id)
-        """유저 아이디와 맞는 정보를 서버 db에서 가져와서 정보를 복사해 넣는다."""
-        # 서버 데이터베이스 연결
-        server_conn = sqlite3.connect('../Server/data.db')
-
-        # (조건 설정) 클라이언트 테이블: sql문
-
-        condition = {
-            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
-            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{self.user_id}' OR FRD_ID ='{self.user_id}'",
-            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{self.user_id}' GROUP BY TB_CHATROOM.CR_ID",
-            # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
-            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{self.user_id}')"
-            ,
-        }
-
-        # 클라이언트 테이블 생성(있으면 삭제 후 추가)
-        client_conn = sqlite3.connect('../Client/data.db')
-        client_cursor = client_conn.cursor()
-        for c_table, query in condition.items():
-            client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
-            server_data = pd.read_sql_query(query, server_conn)
-            server_data.to_sql(c_table, client_conn, index=False)
-
-
-
-        condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{self.user_id}'"
-        condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
-        table_dict = pd.read_sql_query(condition_2, server_conn).to_dict()
-
-        # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
-        for idx in table_dict.values():
-            table_name = f'C{idx[0]}'  # 테이블 이름(클라이언트는 C 붙음)
-            client_cursor.executescript(f"DROP TABLE IF EXISTS {table_name}")  # 테이블 삭제
-            server_data = pd.read_sql_query(f"SELECT * FROM {idx[0]}", server_conn)  # 테이블 내용 불러오기
-            server_data.to_sql(table_name, client_conn, index=False)  # 저장
-
-        # 변경사항 저장
-        client_conn.commit()
-
-        # 연결 종료
-        client_conn.close()
-
 
     # ================================================== 대화 화면 ==================================================
 
@@ -645,6 +601,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.lbl_room_number.clear()
 
         self.clear_layout(self.layout_talk)
+        QtTest.QTest.qWait(50)
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
             if data["USER_NM"]:
@@ -652,7 +609,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:       # ------------------------- TB_CONTENT 예외처리
                 text_ = data["CNT_CONTENT"]
                 if "-" in text_:
-                    self.add_date_line(datetime.strptime(text_, '%Y-%m-%d'))       # /// 오류 예상 지점 ///
+                    self.add_date_line(datetime.strptime(text_, '%Y-%m-%d'))
                 else:
                     self.add_notice_line(text_)
 
@@ -777,7 +734,6 @@ class MainWidget(QWidget, Ui_MainWidget):
                 clear_check = True
 
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
-        # if clear_check and self.layout_list.count() > 0:      # ----------------------- clear layout 에 예외처리 하나 추가 했는데 지운는 거 어때요?
         if clear_check:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
@@ -908,7 +864,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             online_items = list()
             offline_items = list()
-
             for i, data in self.list_info[0].iterrows():
                 item = ListItem(data["F_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("1:1 대화", self.move_single_chat, item)
@@ -992,6 +947,9 @@ class MainWidget(QWidget, Ui_MainWidget):
                 delete_table = DeleteTable(self.room_id, self.user_id, self.user_info["USER_NM"])
                 self.client.send(delete_table)
                 self.db.delete_my_table(delete_table)
+                self.btn_multi.setChecked(True)
+                self.list_btn_check("multi")
+                self.init_talk("PA_1")
 
     # 타유저 채팅방 나가기
     def delete_talbe(self, data:DeleteTable):
@@ -1013,7 +971,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             chat_name = self.dlg_add_chat.chat_name
             chat_mem = self.dlg_add_chat.members
             if not chat_name and chat_mem:
-                chat_name = ', '.join(chat_mem)
+                chat_name = ', '.join(chat_mem[1])
 
             member_cnt = len(chat_mem[0])
 
@@ -1022,37 +980,29 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:
                 self.dlg_warning.set_dialog_type(bt_cnt=1, text="아무 일도 일어나지 않습니다.")
 
-    # 채팅방 개설
+    # 채팅방 개설 요성
     def new_chat_room(self, t_title: str, t_id: list, t_nm:list):
+        print("개설 요청 발송")
         # 방 개설
-        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title)
-        cr_id = self.db.create_chatroom(chat_room)
+        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title, user_name_=self.user_info["USER_NM"])
         self.client.send(chat_room)
 
-        if len(t_id) == 1:
-            self.init_list("single")
-        else:
-            self.init_list("multi")
-
-        # 입장 알림
-        text = ", ".join(t_nm)+"님이 입장했습니다."
-        self.db.insert_content(ReqChat(cr_id, "", text))
-        self.add_notice_line(text)
-        chat_room.cr_id_ = cr_id
-
-        self.init_talk(cr_id)    # 새 채팅방으로 이동
-
-    # 신규 방 개설 (타유저 개설)
+    # 채팅방 개설 수신
     def join_chat_room(self, data:JoinChat):
+        print("join_chat_room")
+        print(data.__dict__)
         # 방 개설
         self.db.create_chatroom(data)
 
         # 입장 알림
-        text = ", ".join(data.member_name)+"님이 입장했습니다."
+        text = data.user_name_+", "
+        text += ", ".join(data.member_name)+"님이 입장했습니다."
         self.db.insert_content(ReqChat(data.cr_id_, "", text))
         self.add_notice_line(text)
-        print(text)
-        print(get_data_tuple(data))
+        print("개설 완료!")
+        if data.user_id_ == self.user_id:
+            self.init_list("single")
+            self.init_talk(data.cr_id_)  # 새 채팅방으로 이동
 
     # 친구 요청 응답 보내기
     def add_friend(self, t_type, t_id):
@@ -1090,10 +1040,14 @@ class MainWidget(QWidget, Ui_MainWidget):
         else:
             self.db.delete_friend(data.user_id_, data.frd_id_)
 
+        self.clear_layout(self.layout_list)
+        self.init_list("friend")
+
     # 친구 요청 받음
     def req_friend(self, data:ReqSuggetsFriend):
         self.db.insert_friend(data)
-
+        self.clear_layout(self.layout_list)
+        self.init_list("friend")
 
     # 친구와 1:1 대화하기
     @pyqtSlot()
@@ -1109,7 +1063,8 @@ class MainWidget(QWidget, Ui_MainWidget):
                 return
         nm_ = t_friend.item_nm.lstrip("[ ")
         nm_ = nm_.rstrip(" ]")
-        self.new_chat_room(nm_, [t_friend.item_id], [t_friend.item_nm])
+        title = f"{nm_}님, {self.user_info['USER_NM']}의 1:1 대화방'"
+        self.new_chat_room(title, [t_friend.item_id], [t_friend.item_nm])
 
     # 로그아웃 버튼 클릭 시
     def logout(self):
@@ -1120,7 +1075,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.edt_login_pwd.clear()
         # 화면 갱신
         self.dlg_setting.reject()
-        self.dlg_setting.btn_notice.setChecked(True)  # ------------------ 9시 52분 보고 이후 추가
+        self.dlg_setting.btn_notice.setChecked(True)
         self.stack_main.setCurrentWidget(self.page_login)
         if not self.btn_multi.isChecked():
             self.btn_multi.setChecked(True)
@@ -1147,5 +1102,4 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def change_state(self, data):
         self.db.change_user_state(data)
-
 # ==============================================================================================================
